@@ -1,26 +1,201 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap');
+
 @import "tailwindcss";
+@import "tw-animate-css";
 
+@custom-variant dark (&:is(.dark *));
+
+/* ===========================
+   Tailwind Theme (v4)
+   =========================== */
+@theme {
+  /* Core colors */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  /* Custom colors */
+  --color-cream: hsl(var(--cream));
+  --color-cream-dark: hsl(var(--cream-dark));
+  --color-leaf: hsl(var(--leaf));
+  --color-lemon: hsl(var(--lemon));
+  --color-lemon-light: hsl(var(--lemon-light));
+  --color-orange: hsl(var(--orange));
+  --color-fresh-green: hsl(var(--fresh-green));
+  --color-fresh-green-light: hsl(var(--fresh-green-light));
+
+  /* Radius */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+}
+
+/* ===========================
+   CSS Variables (Light)
+   =========================== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --radius: 0.75rem;
+
+  --background: 60 20% 99%;
+  --foreground: 150 10% 15%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 150 10% 15%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 150 10% 15%;
+
+  --primary: 142 71% 40%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 48 96% 53%;
+  --secondary-foreground: 150 10% 15%;
+
+  --muted: 60 10% 96%;
+  --muted-foreground: 150 5% 45%;
+
+  --accent: 142 50% 95%;
+  --accent-foreground: 142 71% 35%;
+
+  --destructive: 0 84% 60%;
+  --border: 142 20% 88%;
+  --input: 142 20% 88%;
+  --ring: 142 71% 40%;
+
+  /* Custom colors */
+  --cream: 45 40% 97%;
+  --cream-dark: 45 30% 92%;
+  --leaf: 142 60% 30%;
+  --lemon: 48 96% 53%;
+  --lemon-light: 48 100% 90%;
+  --orange: 25 95% 53%;
+  --fresh-green: 142 71% 45%;
+  --fresh-green-light: 142 60% 94%;
+
+  /* Gradients */
+  --gradient-hero: linear-gradient(135deg, hsl(142 60% 94%) 0%, hsl(48 100% 95%) 100%);
+  --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(60 20% 98%) 100%);
+  --gradient-primary: linear-gradient(135deg, hsl(142 71% 40%) 0%, hsl(142 71% 35%) 100%);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px hsl(142 20% 20% / 0.05);
+  --shadow-md: 0 4px 6px -1px hsl(142 20% 20% / 0.08);
+  --shadow-lg: 0 10px 15px -3px hsl(142 20% 20% / 0.08);
+  --shadow-card: 0 2px 8px hsl(142 20% 20% / 0.06);
+  --shadow-card-hover: 0 8px 24px hsl(142 20% 20% / 0.12);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ===========================
+   Dark Mode
+   =========================== */
+.dark {
+  --background: 150 10% 10%;
+  --foreground: 60 20% 98%;
+
+  --card: 150 10% 12%;
+  --card-foreground: 60 20% 98%;
+
+  --popover: 150 10% 12%;
+  --popover-foreground: 60 20% 98%;
+
+  --primary: 142 71% 45%;
+  --secondary: 48 80% 45%;
+
+  --muted: 150 10% 18%;
+  --accent: 142 40% 18%;
+
+  --border: 150 10% 20%;
+  --input: 150 10% 20%;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ===========================
+   Base Styles
+   =========================== */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Nunito', sans-serif;
+  }
+
+  .font-display {
+    font-family: 'Playfair Display', serif;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ===========================
+   Components
+   =========================== */
+@layer components {
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .badge-discount {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-primary text-primary-foreground;
+  }
+
+  .badge-new {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-secondary text-secondary-foreground;
+  }
+
+  .card-product {
+    @apply bg-card rounded-2xl shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-6 py-3 rounded-full;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold px-6 py-3 rounded-full;
+  }
+
+  .section-title {
+    @apply text-2xl md:text-3xl font-bold;
+  }
+
+  .delivery-notice {
+    @apply bg-accent border border-primary/20 text-accent-foreground px-4 py-2 rounded-lg text-sm;
+  }
+}
+
+/* ===========================
+   Utilities
+   =========================== */
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-leaf;
+  }
 }

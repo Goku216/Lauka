@@ -1,0 +1,57 @@
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+
+class apiClient {
+    private client: AxiosInstance;
+
+    constructor(baseURL: string = (import.meta as any).env.VITE_API_BASE_URL || 'http://testapi.com') {
+        this.client = axios.create({
+            baseURL,
+            timeout: 10000,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        // Request interceptor
+        this.client.interceptors.request.use(
+            (config) => {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                }
+                return config;
+            },
+            (error) => Promise.reject(error)
+        );
+
+        // Response interceptor
+        this.client.interceptors.response.use(
+            (response) => response.data,
+            (error) => {
+                if (error.response?.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login';
+                }
+                return Promise.reject(error);
+            }
+        );
+    }
+
+    get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+        return this.client.get(url, config);
+    }
+
+    post<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+        return this.client.post(url, data, config);
+    }
+
+    put<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+        return this.client.put(url, data, config);
+    }
+
+    delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+        return this.client.delete(url, config);
+    }
+}
+
+export default new apiClient();
