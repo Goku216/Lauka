@@ -3,13 +3,14 @@ import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 class apiClient {
     private client: AxiosInstance;
 
-    constructor(baseURL: string = (import.meta as any).env.VITE_API_BASE_URL || 'http://testapi.com') {
+    constructor(baseURL: string = process.env.NEXT_PUBLIC_BACKEND_API || 'http://testapi.com') {
         this.client = axios.create({
             baseURL,
             timeout: 10000,
             headers: {
                 'Content-Type': 'application/json',
             },
+            withCredentials: true,
         });
 
         // Request interceptor

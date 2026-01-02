@@ -1,13 +1,19 @@
 "use client"
 
-import { useState } from 'react';
-import { ShoppingCart, Menu, X, MapPin, Phone, Search, Leaf } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ShoppingCart, Menu, X, MapPin, Phone, Search, Leaf, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useCart } from '@/context/CartContext';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { checkAuth, logout } from '@/service/api';
+import { navigate } from 'next/dist/client/components/segment-cache/navigation';
+
+interface HeaderProps {
+  setModal: (value: 'none' | 'login' | 'signup') => void;
+}
 
 const navLinks = [
   { name: 'Home', path: '/' },
@@ -17,10 +23,30 @@ const navLinks = [
   { name: 'Contact', path: '/contact' },
 ];
 
-export function Header() {
+export function Header({ setModal }: HeaderProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+
+  useEffect(() => {
+    const response = async () => {
+      const authStatus = await checkAuth();
+      setIsAuthenticated(authStatus);
+    };
+    response();
+  }, []);
+
   const { totalItems } = useCart();
   const pathname = usePathname();
+
+  const handleLogout = async () => {
+    try {
+    await logout();
+    window.location.reload();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-md border-b border-border">
@@ -71,7 +97,7 @@ export function Header() {
           </nav>
 
           {/* Search - Desktop */}
-          <div className="hidden md:flex items-center flex-1 max-w-md mx-4">
+          <div className="hidden md:flex items-center flex-1 max-w-sm mx-4">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -104,7 +130,27 @@ export function Header() {
                 )}
               </Button>
             </Link>
-
+            {!isAuthenticated &&
+            <>
+            <Button className='hidden lg:block' onClick={()=> setModal('login')} variant="default">
+                Login
+            </Button>
+            <Button className='hidden lg:block' onClick={()=> setModal('signup')} variant="outline">
+                Signup
+            </Button>
+            </>
+}
+            {isAuthenticated &&
+            <>
+            <Button  variant="default" size="icon" className="text-center flex " onClick={() => setModal('none')}>
+              <User className="h-5 w-5" />
+            </Button>
+            <Button onClick={handleLogout}  variant="ghost" size="icon" className="text-center flex hover:bg-red-400 hover:text-black">
+              <LogOut className="h-5 w-5" />
+            </Button>
+            </>
+}
+           
             {/* Mobile Menu */}
             <Sheet>
               <SheetTrigger asChild>
@@ -151,6 +197,7 @@ export function Header() {
           </div>
         )}
       </div>
+     
     </header>
   );
 }

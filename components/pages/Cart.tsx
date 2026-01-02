@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { LoginForm } from '../login-form';
 import { useState, useEffect } from 'react';
 import { SignupForm } from '../signup-form';
+import { checkAuth } from '@/service/api';
 
 export default function Cart() {
   const { items, totalItems, totalPrice, updateQuantity, removeItem } = useCart();
@@ -38,9 +39,15 @@ export default function Cart() {
     );
   }
 
-  const handleCheckout = () => {
-    console.log("Proceeding to checkout...");
-    setModal('login');
+  const handleCheckout = async () => {
+    const isAuthenticated = await checkAuth();
+    console.log('User authenticated:', isAuthenticated);
+    if (isAuthenticated) {
+      // Redirect to checkout page
+      window.location.href = '/checkout';
+    } else {
+      setModal('login');
+    }
   }
 
   useEffect(() => {
