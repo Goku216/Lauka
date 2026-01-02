@@ -101,6 +101,11 @@
   --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(60 20% 98%) 100%);
   --gradient-primary: linear-gradient(135deg, hsl(142 71% 40%) 0%, hsl(142 71% 35%) 100%);
 
+ --gradient-primary2: linear-gradient(135deg, hsl(226, 70%, 55%), hsl(250, 70%, 60%));
+  --gradient-hero2: linear-gradient(135deg, hsl(220, 14%, 96%), hsl(0, 0%, 100%));
+
+
+  
   /* Shadows */
   --shadow-sm: 0 1px 2px hsl(142 20% 20% / 0.05);
   --shadow-md: 0 4px 6px -1px hsl(142 20% 20% / 0.08);
@@ -195,7 +200,82 @@
    Utilities
    =========================== */
 @layer utilities {
+  .gradient-primary {
+    background: var(--gradient-primary2);
+  }
+
+  .gradient-hero2 {
+    background: var(--gradient-hero2);
+  }
+
+  .gradient-hero-fresh {
+    background: var(--gradient-hero-fresh);
+  }
+
+  .gradient-card-fresh {
+    background: var(--gradient-card-fresh);
+  }
+
+  .gradient-primary-fresh {
+    background: var(--gradient-primary-fresh);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  .shadow-card-hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-leaf;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out forwards;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }

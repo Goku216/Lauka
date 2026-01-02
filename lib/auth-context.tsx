@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+'use client';
+
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '@/types/AdminPageTypes';
 
 interface AuthContextType {
@@ -22,11 +24,15 @@ const mockAdminUser: User = {
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => {
-    // Check localStorage for persisted auth state
+  const [user, setUser] = useState<User | null>(null);
+
+  // Load user from localStorage on mount
+  useEffect(() => {
     const saved = localStorage.getItem('auth_user');
-    return saved ? JSON.parse(saved) : null;
-  });
+    if (saved) {
+      setUser(JSON.parse(saved));
+    }
+  }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     // Mock authentication - in production, this would call an API

@@ -34,7 +34,7 @@ export function AdminHeader({ title }: AdminHeaderProps) {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search..."
-              className="w-64 pl-9 bg-secondary border-0"
+              className="w-64 pl-9 bg-[#F1F5F9] border-0"
             />
           </div>
 

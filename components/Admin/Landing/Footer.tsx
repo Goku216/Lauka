@@ -4,29 +4,29 @@ import Link from 'next/link';
 
 export function Footer() {
   return (
-    <footer className="bg-foreground text-background py-16">
+    <footer className="bg-[#0F172A] text-[#FFFFFF] py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
             <Link href="/" className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-[#3B5BDB] flex items-center justify-center">
                 <LayoutDashboard className="w-5 h-5 text-primary-foreground" />
               </div>
               <span className="text-xl font-semibold">AdminPanel</span>
             </Link>
-            <p className="text-muted-foreground max-w-sm mb-6">
+            <p className="text-[#64748B] max-w-sm mb-6">
               A modern, minimal admin dashboard built for scale. 
               Manage your business efficiently with powerful tools.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-muted-foreground hover:text-background transition-colors">
+              <a href="#" className="text-[#64748B] hover:text-white transition-colors">
                 <Twitter className="w-5 h-5" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-background transition-colors">
+              <a href="#" className="text-[#64748B] hover:text-white transition-colors">
                 <Github className="w-5 h-5" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-background transition-colors">
+              <a href="#" className="text-[#64748B] hover:text-white transition-colors">
                 <Linkedin className="w-5 h-5" />
               </a>
             </div>
@@ -36,20 +36,20 @@ export function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Product</h4>
             <ul className="space-y-2">
-              <li><a href="#features" className="text-muted-foreground hover:text-background transition-colors">Features</a></li>
-              <li><a href="#pricing" className="text-muted-foreground hover:text-background transition-colors">Pricing</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-background transition-colors">Changelog</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-background transition-colors">Documentation</a></li>
+              <li><a href="#features" className="text-[#64748B] hover:text-white transition-colors">Features</a></li>
+              <li><a href="#pricing" className="text-[#64748B] hover:text-white transition-colors">Pricing</a></li>
+              <li><a href="#" className="text-[#64748B] hover:text-white transition-colors">Changelog</a></li>
+              <li><a href="#" className="text-[#64748B] hover:text-white transition-colors">Documentation</a></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-semibold mb-4">Company</h4>
             <ul className="space-y-2">
-              <li><a href="#about" className="text-muted-foreground hover:text-background transition-colors">About</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-background transition-colors">Blog</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-background transition-colors">Careers</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-background transition-colors">Contact</a></li>
+              <li><a href="#about" className="text-[#64748B] hover:text-white transition-colors">About</a></li>
+              <li><a href="#" className="text-[#64748B] hover:text-white transition-colors">Blog</a></li>
+              <li><a href="#" className="text-[#64748B] hover:text-white transition-colors">Careers</a></li>
+              <li><a href="#" className="text-[#64748B] hover:text-white transition-colors">Contact</a></li>
             </ul>
           </div>
         </div>

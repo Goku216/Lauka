@@ -7,10 +7,9 @@ import { useState } from 'react';
 
 interface NavbarProps {
   onLoginClick: () => void;
-  onSignupClick: () => void;
 }
 
-export function Navbar({ onLoginClick, onSignupClick }: NavbarProps) {
+export function Navbar({ onLoginClick }: NavbarProps) {
   const { isAuthenticated, user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -19,22 +18,22 @@ export function Navbar({ onLoginClick, onSignupClick }: NavbarProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
+          <Link href="/admin" className="flex items-center space-x-2">
+            <div className="w-8 h-8 rounded-lg bg-linear-[#3B5BDB] flex items-center justify-center">
               <LayoutDashboard className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-semibold text-foreground">AdminPanel</span>
+            <span className="text-xl font-semibold text-[#0F172A]">AdminPanel</span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
+            <a href="#features" className="text-[#64748B] hover:text-[#0F172A] transition-colors">
               Features
             </a>
-            <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
+            <a href="#pricing" className="text-[#64748B] hover:text-[#0F172A] transition-colors">
               Pricing
             </a>
-            <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">
+            <a href="#about" className="text-[#64748B] hover:text-[#0F172A] transition-colors">
               About
             </a>
           </div>
@@ -44,20 +43,18 @@ export function Navbar({ onLoginClick, onSignupClick }: NavbarProps) {
             {isAuthenticated ? (
               <>
                 <Link href="/admin/dashboard">
-                  <Button variant="ghost">Dashboard</Button>
+                  <Button variant="ghost" className='hover:bg-[#3B5BDB]/10 cursor-pointer hover:text-[#3B5BDB]'>Dashboard</Button>
                 </Link>
-                <Button variant="outline" onClick={logout}>
+                <Button variant="destructive" className='text-white cursor-pointer hover:bg-destructive/70 hover:text-black' onClick={logout}>
                   Logout
                 </Button>
               </>
             ) : (
               <>
-                <Button variant="ghost" onClick={onLoginClick}>
+                <Button variant="hero" onClick={onLoginClick} className='cursor-pointer'>
                   Login
                 </Button>
-                <Button variant="hero" onClick={onSignupClick}>
-                  Get Started
-                </Button>
+             
               </>
             )}
           </div>
@@ -116,9 +113,6 @@ export function Navbar({ onLoginClick, onSignupClick }: NavbarProps) {
                   <>
                     <Button variant="ghost" onClick={() => { onLoginClick(); setIsMobileMenuOpen(false); }}>
                       Login
-                    </Button>
-                    <Button variant="hero" onClick={() => { onSignupClick(); setIsMobileMenuOpen(false); }}>
-                      Get Started
                     </Button>
                   </>
                 )}
