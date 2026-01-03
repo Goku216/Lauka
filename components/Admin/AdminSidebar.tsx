@@ -75,7 +75,8 @@ export function AdminSidebar({ isCollapsed, onToggle }: AdminSidebarProps) {
                   'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                   isActive
                     ? 'bg-primary text-white'
-                    : 'text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground'
+                    : 'text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground',
+                    isCollapsed && 'justify-center'
                 )}
               >
                 <item.icon className="w-5 h-5 shrink-0" />

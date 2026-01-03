@@ -1,11 +1,26 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/lib/auth-context';
-import { useToast } from '@/hooks/use-toast';
+
 import { Loader2 } from 'lucide-react';
+import { login as apiLogin, login } from '@/service/api';
+import { toast } from 'sonner';
+
+// Zod validation schema
+const loginSchema = z.object({
+  email: z.string()
+    .min(1, 'Email is required')
+    .email('Please enter a valid email address'),
+  password: z.string()
+    .min(1, 'Password is required'),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
 
 interface AuthModalsProps {
   isLoginOpen: boolean;
@@ -15,41 +30,38 @@ interface AuthModalsProps {
 export function AuthModals({
   isLoginOpen,
   onLoginClose,
-
 }: AuthModalsProps) {
-  const { login } = useAuth();
-  const { toast } = useToast();
+
   const [isLoading, setIsLoading] = useState(false);
 
-  // Login form state
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
 
-    const success = await login(loginEmail, loginPassword);
+    try {
+      const response = await login(data);
+     
+      toast.success(response || 'Login successful');
 
-    if (success) {
-      toast({
-        title: 'Welcome back!',
-        description: 'You have successfully logged in.',
-      });
       onLoginClose();
-      setLoginEmail('');
-      setLoginPassword('');
-    } else {
-      toast({
-        title: 'Login failed',
-        description: 'Please check your credentials and try again.',
-        variant: 'destructive',
-      });
+      reset();
+      
+      // Optional: Trigger auth check or reload
+      window.location.reload();
+    } catch (error: any) {
+      toast.error(error.message || 'Login failed');
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
-
 
   return (
     <>
@@ -62,19 +74,19 @@ export function AuthModals({
               Enter your credentials to access your account
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleLogin} className="space-y-4 mt-4">
-           
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
             <div className="space-y-2">
               <Label htmlFor="login-email">Email</Label>
               <Input
                 id="login-email"
                 type="email"
                 placeholder="you@example.com"
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
+                {...register('email')}
                 className="focus-visible:border-[#3B5BDB] focus-visible:ring-[#3B5BDB] focus-visible:ring-[1px]"
-                required
               />
+              {errors.email && (
+                <p className="text-sm text-red-500">{errors.email.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="login-password">Password</Label>
@@ -82,21 +94,20 @@ export function AuthModals({
                 id="login-password"
                 type="password"
                 placeholder="••••••••"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
+                {...register('password')}
                 className="focus-visible:border-[#3B5BDB] focus-visible:ring-[#3B5BDB] focus-visible:ring-[1px]"
-                required
               />
+              {errors.password && (
+                <p className="text-sm text-red-500">{errors.password.message}</p>
+              )}
             </div>
             <Button variant="hero" type="submit" className="w-full cursor-pointer" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Sign in
             </Button>
-          
           </form>
         </DialogContent>
       </Dialog>
-
     </>
   );
 }

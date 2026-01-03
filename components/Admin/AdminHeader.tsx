@@ -12,6 +12,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
+import { logout } from '@/service/api';
+import { toast } from 'sonner';
 
 
 interface AdminHeaderProps {
@@ -19,7 +21,18 @@ interface AdminHeaderProps {
 }
 
 export function AdminHeader({ title }: AdminHeaderProps) {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success('Logged out successfully');
+      window.location.reload();
+    } catch (error) {
+      toast.error('Logout failed');
+      console.error('Logout failed:', error);
+    }
+  }
 
   return (
     <header className="sticky top-0 z-30 h-16 bg-background/95 backdrop-blur border-b border-border">
@@ -70,7 +83,7 @@ export function AdminHeader({ title }: AdminHeaderProps) {
                 <Link href="/admin/settings">Settings</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={logout} className="text-destructive">
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                 Logout
               </DropdownMenuItem>
             </DropdownMenuContent>

@@ -20,13 +20,33 @@ const pageTitles: Record<string, string> = {
 
 export function AdminLayout({ children }: React.PropsWithChildren) {
   const { isAuthenticated } = useAuth();
+  // Don't access localStorage during SSR — initialize to a safe default
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
-  // Redirect to landing if not authenticated
+  // Initialize collapse state from localStorage on mount
   useEffect(() => {
-    if (!isAuthenticated) router.push('/');
+    try {
+      const stored = localStorage.getItem('admin_sidebar_collapsed');
+      if (stored !== null) setIsSidebarCollapsed(stored === 'true');
+    } catch (e) {
+      // ignore
+    }
+  }, []);
+
+  // Persist collapse state whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('admin_sidebar_collapsed', String(isSidebarCollapsed));
+    } catch (e) {
+      // ignore
+    }
+  }, [isSidebarCollapsed]);
+
+  // Redirect to landing only if explicitly not authenticated (not during loading state)
+  useEffect(() => {
+    if (isAuthenticated === false) router.push('/');
   }, [isAuthenticated, router]);
 
   const pageTitle = pageTitles[pathname || '/admin'] || 'Dashboard';
@@ -35,7 +55,7 @@ export function AdminLayout({ children }: React.PropsWithChildren) {
     <div className="min-h-screen bg-background">
       <AdminSidebar
         isCollapsed={isSidebarCollapsed}
-        onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        onToggle={() => setIsSidebarCollapsed(prev => !prev)}
       />
 
       <div

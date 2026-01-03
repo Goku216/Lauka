@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,9 +12,14 @@ import { LUMBINI_DISTRICTS, CheckoutForm } from '@/types';
 import { toast } from '@/hooks/use-toast';
 import { MapPin, Truck, ShoppingBag, CheckCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/auth-context';
+import Protected from '../Protected';
 
 export default function Checkout() {
   const { items, totalPrice, clearCart } = useCart();
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
@@ -28,6 +33,12 @@ export default function Checkout() {
     notes: '',
   });
   const [errors, setErrors] = useState<Partial<CheckoutForm>>({});
+
+  useEffect(() => {
+    if (isAuthenticated === false) {
+      router.push('/');
+    }
+  }, [isAuthenticated, router]);
 
   if (items.length === 0 && !orderPlaced) {
     return (
@@ -145,6 +156,7 @@ export default function Checkout() {
   };
 
   return (
+    <Protected>
     <Layout>
       <div className="container-custom py-8">
         {/* Breadcrumb */}
@@ -360,5 +372,6 @@ export default function Checkout() {
         </form>
       </div>
     </Layout>
+    </Protected>
   );
 }

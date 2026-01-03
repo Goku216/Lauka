@@ -17,7 +17,7 @@ export function Layout({ children }: LayoutProps) {
       <Header setModal={setModal} />
       <main className="flex-1">{children}</main>
         {modal !== 'none' && (
-                    <div className="fixed inset-0 z-[100000] flex items-center justify-center">
+                    <div className="fixed inset-0 z-100000 flex items-center justify-center">
                       <div
                         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
                         onClick={() => setModal('none')}
@@ -26,7 +26,7 @@ export function Layout({ children }: LayoutProps) {
                       <div
                         role="dialog"
                         aria-modal="true"
-                        className="relative w-full max-w-md mx-4 z-[100001]"
+                        className="relative w-full max-w-md mx-4 z-100001"
                       >
                         <div className="p-2">
                           {modal === 'login' ? (

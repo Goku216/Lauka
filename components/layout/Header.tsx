@@ -1,5 +1,4 @@
 "use client"
-
 import { useEffect, useState } from 'react';
 import { ShoppingCart, Menu, X, MapPin, Phone, Search, Leaf, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,6 @@ import { useCart } from '@/context/CartContext';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { checkAuth, logout } from '@/service/api';
-import { navigate } from 'next/dist/client/components/segment-cache/navigation';
 
 interface HeaderProps {
   setModal: (value: 'none' | 'login' | 'signup') => void;

@@ -19,7 +19,8 @@ export interface RegisterPayload {
 export const login = async (data: LoginPayload): Promise<any> => {
     try {
         const response = await apiClient.post<any>("/auth/login/", data);
-        return response.data;
+       
+        return response.message;
     } catch (error: any) {
         throw new Error(error.response?.data?.detail || "Login failed");
     }

@@ -1,17 +1,32 @@
 "use client";
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
+import { logout } from '@/service/api';
 import { LayoutDashboard, Menu, X } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface NavbarProps {
   onLoginClick: () => void;
 }
 
 export function Navbar({ onLoginClick }: NavbarProps) {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const router = useRouter();
+
+   const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success('Logged out successfully');
+      router.push('/');
+    } catch (error) {
+      toast.error('Logout failed');
+      console.error('Logout failed:', error);
+    }
+  }
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -45,7 +60,7 @@ export function Navbar({ onLoginClick }: NavbarProps) {
                 <Link href="/admin/dashboard">
                   <Button variant="ghost" className='hover:bg-[#3B5BDB]/10 cursor-pointer hover:text-[#3B5BDB]'>Dashboard</Button>
                 </Link>
-                <Button variant="destructive" className='text-white cursor-pointer hover:bg-destructive/70 hover:text-black' onClick={logout}>
+                <Button  variant="destructive" className='text-white cursor-pointer hover:bg-destructive/70 hover:text-black' onClick={handleLogout}>
                   Logout
                 </Button>
               </>
