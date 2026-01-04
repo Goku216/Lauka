@@ -165,6 +165,7 @@ export function Header({ setModal }: HeaderProps) {
             )}
             {isAuthenticated && (
               <>
+              <Link href="/profile">
                 <Button
                   variant="default"
                   size="icon"
@@ -173,6 +174,7 @@ export function Header({ setModal }: HeaderProps) {
                 >
                   <User className="h-5 w-5" />
                 </Button>
+                </Link>
                 <Button
                   onClick={handleLogout}
                   variant="ghost"
@@ -230,6 +232,7 @@ export function Header({ setModal }: HeaderProps) {
                     </>
                   ) : (
                     <div className="flex flex-col gap-2">
+                      <Link href="/profile" className="flex">
                       <Button
                         variant="default"
                         className="flex-1 flex items-center justify-center gap-2"
@@ -241,6 +244,7 @@ export function Header({ setModal }: HeaderProps) {
                         <User className="h-5 w-5" />
                         <span>Profile</span>
                       </Button>
+                      </Link>
                       <Button
                         onClick={() => {
                           setIsSheetOpen(false);

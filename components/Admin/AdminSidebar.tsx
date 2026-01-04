@@ -9,6 +9,7 @@ import {
   LogOut,
   ChevronLeft,
   Menu,
+  PackageOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
@@ -18,9 +19,11 @@ import { usePathname } from 'next/navigation';
 const navItems = [
   { title: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
   { title: 'Products', href: '/admin/products', icon: Package },
+  {title: 'Orders', href: "/admin/orders", icon: PackageOpen},
   { title: 'Users', href: '/admin/users', icon: Users },
   { title: 'Categories', href: '/admin/categories', icon: FolderOpen },
   { title: 'Settings', href: '/admin/settings', icon: Settings },
+  
 ];
 
 interface AdminSidebarProps {

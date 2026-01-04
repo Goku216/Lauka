@@ -16,6 +16,7 @@ const pageTitles: Record<string, string> = {
   '/admin/users': 'Users',
   '/admin/categories': 'Categories',
   '/admin/settings': 'Settings',
+  '/admin/orders': 'Orders'
 };
 
 export function AdminLayout({ children }: React.PropsWithChildren) {
