@@ -69,6 +69,8 @@ export function LoginForm({
       // Reset form and close modal on success
       reset()
       onLoginSuccess?.()
+      window.location.reload();
+      toast.success("Logged In Successfully")
     } catch (error) {
       console.error('Login error:', error)
       toast.error("Login failed. Please try again.")

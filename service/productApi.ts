@@ -48,6 +48,8 @@ export interface ProductResponse {
   category: string;
   is_featured?: boolean;
   is_new?: boolean;
+  rating?: number;
+  reviews?: number;
 }
 
 class ProductApi {
@@ -139,9 +141,11 @@ class ProductApi {
     // Send as 'images' instead of 'additional_images'
     if (data.additional_images && data.additional_images.length > 0) {
       data.additional_images.forEach((file) => {
-        formData.append('images', file);
+        formData.append('additional_images', file);
       });
     }
+
+  
 
     const response = await fetch(`${API_BASE_URL}/products/create/`, {
       method: 'POST',
@@ -178,10 +182,15 @@ class ProductApi {
     }
     
     // Send as 'images' instead of 'additional_images'
-    if (data.additional_images && data.additional_images.length > 0) {
-      data.additional_images.forEach((file) => {
-        formData.append('images', file);
-      });
+   if (data.additional_images && data.additional_images.length > 0) {
+     data.additional_images.forEach((file) => {
+       formData.append("additional_images", file);
+     });
+   }
+
+
+      for (const [key, value] of formData.entries()) {
+      console.log(key, value);
     }
 
     const response = await fetch(`${API_BASE_URL}/products/${id}/update/`, {

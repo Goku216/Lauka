@@ -1,30 +1,40 @@
-"use client"
-import { useEffect, useState } from 'react';
-import { ShoppingCart, Menu, X, MapPin, Phone, Search, Leaf, User, LogOut } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { useCart } from '@/context/CartContext';
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
-import { checkAuth, logout } from '@/service/api';
+"use client";
+import { useEffect, useState } from "react";
+import {
+  ShoppingCart,
+  Menu,
+  X,
+  MapPin,
+  Phone,
+  Search,
+  Leaf,
+  User,
+  LogOut,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useCart } from "@/context/CartContext";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { checkAuth, logout } from "@/service/api";
 
 interface HeaderProps {
-  setModal: (value: 'none' | 'login' | 'signup') => void;
+  setModal: (value: "none" | "login" | "signup") => void;
 }
 
 const navLinks = [
-  { name: 'Home', path: '/' },
-  { name: 'Products', path: '/products' },
-  { name: 'About', path: '/about' },
-  { name: 'Delivery', path: '/delivery' },
-  { name: 'Contact', path: '/contact' },
+  { name: "Home", path: "/" },
+  { name: "Products", path: "/products" },
+  { name: "About", path: "/about" },
+  { name: "Delivery", path: "/delivery" },
+  { name: "Contact", path: "/contact" },
 ];
 
 export function Header({ setModal }: HeaderProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   useEffect(() => {
     const response = async () => {
@@ -39,12 +49,17 @@ export function Header({ setModal }: HeaderProps) {
 
   const handleLogout = async () => {
     try {
-    await logout();
-    window.location.reload();
+      await logout();
+      window.location.reload();
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
     }
-  }
+  };
+
+  const handleModalOpen = (modalType: "login" | "signup") => {
+    setIsSheetOpen(false); // Close the sheet
+    setModal(modalType); // Open the modal
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-md border-b border-border">
@@ -53,7 +68,9 @@ export function Header({ setModal }: HeaderProps) {
         <div className="container-custom flex items-center justify-between text-sm">
           <div className="flex items-center gap-2">
             <MapPin className="h-4 w-4" />
-            <span className="hidden sm:inline">Delivery available only in Lumbini Province</span>
+            <span className="hidden sm:inline">
+              Delivery available only in Lumbini Province
+            </span>
             <span className="sm:hidden">Lumbini Province Only</span>
           </div>
           <div className="flex items-center gap-2">
@@ -84,9 +101,7 @@ export function Header({ setModal }: HeaderProps) {
                 key={link.path}
                 href={link.path}
                 className={`font-medium transition-colors hover:text-primary ${
-                  pathname === link.path
-                    ? 'text-primary'
-                    : 'text-foreground'
+                  pathname === link.path ? "text-primary" : "text-foreground"
                 }`}
               >
                 {link.name}
@@ -128,51 +143,120 @@ export function Header({ setModal }: HeaderProps) {
                 )}
               </Button>
             </Link>
-            {!isAuthenticated &&
-            <>
-            <Button className='hidden lg:block' onClick={()=> setModal('login')} variant="default">
-                Login
-            </Button>
-            <Button className='hidden lg:block' onClick={()=> setModal('signup')} variant="outline">
-                Signup
-            </Button>
-            </>
-}
-            {isAuthenticated &&
-            <>
-            <Button  variant="default" size="icon" className="text-center flex " onClick={() => setModal('none')}>
-              <User className="h-5 w-5" />
-            </Button>
-            <Button onClick={handleLogout}  variant="ghost" size="icon" className="text-center flex hover:bg-red-400 hover:text-black">
-              <LogOut className="h-5 w-5" />
-            </Button>
-            </>
-}
-           
+
+            {/* Desktop Auth Buttons */}
+            {!isAuthenticated && (
+              <>
+                <Button
+                  className="hidden lg:block"
+                  onClick={() => setModal("login")}
+                  variant="default"
+                >
+                  Login
+                </Button>
+                <Button
+                  className="hidden lg:block"
+                  onClick={() => setModal("signup")}
+                  variant="outline"
+                >
+                  Signup
+                </Button>
+              </>
+            )}
+            {isAuthenticated && (
+              <>
+                <Button
+                  variant="default"
+                  size="icon"
+                  className="text-center hidden lg:flex"
+                  onClick={() => setModal("none")}
+                >
+                  <User className="h-5 w-5" />
+                </Button>
+                <Button
+                  onClick={handleLogout}
+                  variant="ghost"
+                  size="icon"
+                  className="text-center hidden lg:flex hover:bg-red-400 hover:text-black"
+                >
+                  <LogOut className="h-5 w-5" />
+                </Button>
+              </>
+            )}
+
             {/* Mobile Menu */}
-            <Sheet>
+            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="lg:hidden">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-70">
-                <nav className="flex flex-col gap-4 mt-8">
+                <nav className="flex flex-col gap-4 mt-8 ml-2">
                   {navLinks.map((link) => (
                     <Link
                       key={link.path}
                       href={link.path}
                       className={`font-medium text-lg transition-colors hover:text-primary ${
                         pathname === link.path
-                          ? 'text-primary'
-                          : 'text-foreground'
+                          ? "text-primary"
+                          : "text-foreground"
                       }`}
+                      onClick={() => setIsSheetOpen(false)}
                     >
                       {link.name}
                     </Link>
                   ))}
                 </nav>
-                <div className="mt-8 p-4 bg-accent rounded-lg">
+
+                {/* Mobile Auth Buttons */}
+                <div className="mt-8 mx-2 space-y-3">
+                  {!isAuthenticated ? (
+                    <>
+                      <Button
+                        className="w-full"
+                        onClick={() => handleModalOpen("login")}
+                        variant="default"
+                      >
+                        Login
+                      </Button>
+                      <Button
+                        className="w-full"
+                        onClick={() => handleModalOpen("signup")}
+                        variant="outline"
+                      >
+                        Signup
+                      </Button>
+                    </>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        variant="default"
+                        className="flex-1 flex items-center justify-center gap-2"
+                        onClick={() => {
+                          setIsSheetOpen(false);
+                          setModal("none");
+                        }}
+                      >
+                        <User className="h-5 w-5" />
+                        <span>Profile</span>
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setIsSheetOpen(false);
+                          handleLogout();
+                        }}
+                        variant="ghost"
+                        className="flex-1  flex items-center justify-center gap-2 bg-destructive hover:text-black "
+                      >
+                        <LogOut className="h-5 w-5" />
+                        <span>Logout</span>
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-8 mx-3 p-4 bg-accent rounded-lg">
                   <p className="text-sm text-accent-foreground font-medium">
                     📍 Delivery available only within Lumbini Province
                   </p>
@@ -195,7 +279,6 @@ export function Header({ setModal }: HeaderProps) {
           </div>
         )}
       </div>
-     
     </header>
   );
 }

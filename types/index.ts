@@ -1,18 +1,22 @@
+import { ProductImage } from "@/service/productApi";
+
 export interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  originalPrice?: number;
-  discount?: number;
-  image: string;
-  category: string;
-  unit: string;
-  inStock: boolean;
-  rating: number;
-  reviews: number;
-  isNew?: boolean;
-  isFeatured?: boolean;
+ reference_id: string;
+   name: string;
+   description: string;
+   price: string;
+   discount_price: string;
+   stock: number;
+   image: string;
+   unit: string;
+   images: ProductImage[];
+   tags: string;
+   in_stock: boolean;
+   category: string;
+   is_featured?: boolean;
+   is_new?: boolean;
+   rating?: number;
+   reviews?: number;
 }
 
 export interface Category {

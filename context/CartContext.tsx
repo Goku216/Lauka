@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import  { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { CartItem, Product } from '@/types';
 import { toast } from '@/hooks/use-toast';
 
@@ -19,14 +19,14 @@ type CartAction =
 
 const calculateTotals = (items: CartItem[]) => ({
   totalItems: items.reduce((sum, item) => sum + item.quantity, 0),
-  totalPrice: items.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
+  totalPrice: items.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0),
 });
 
 const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
     case 'ADD_ITEM': {
       const existingIndex = state.items.findIndex(
-        item => item.product.id === action.payload.id
+        item => item.product.reference_id === action.payload.reference_id
       );
       let newItems: CartItem[];
       if (existingIndex > -1) {
@@ -41,18 +41,18 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       return { items: newItems, ...calculateTotals(newItems) };
     }
     case 'REMOVE_ITEM': {
-      const newItems = state.items.filter(item => item.product.id !== action.payload);
+      const newItems = state.items.filter(item => item.product.reference_id !== action.payload);
       return { items: newItems, ...calculateTotals(newItems) };
     }
     case 'UPDATE_QUANTITY': {
       if (action.payload.quantity <= 0) {
         const newItems = state.items.filter(
-          item => item.product.id !== action.payload.productId
+          item => item.product.reference_id !== action.payload.productId
         );
         return { items: newItems, ...calculateTotals(newItems) };
       }
       const newItems = state.items.map(item =>
-        item.product.id === action.payload.productId
+        item.product.reference_id === action.payload.productId
           ? { ...item, quantity: action.payload.quantity }
           : item
       );

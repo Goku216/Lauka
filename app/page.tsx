@@ -1,17 +1,17 @@
 
 import { Layout } from '@/components/layout/Layout';
 import { Hero } from '@/components/Hero';
-import { ProductCard } from '@/components/ProductCard';
-import { CategoryCard } from '@/components/CategoryCard';
+
 import { TrustBadges } from '@/components/TrustBadges';
 import { DeliveryBanner } from '@/components/DeliveryBanner';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Timer } from 'lucide-react';
-import { categories, getFeaturedProducts } from '@/data/products';
+
 import Link from 'next/link';
+import CategoriesSection from '@/components/Landing/CategoriesSection';
 
 const page = () => {
-  const featuredProducts = getFeaturedProducts();
+  // const featuredProducts = getFeaturedProducts();
 
   return (
     <Layout>
@@ -30,10 +30,6 @@ const page = () => {
               <p className="text-muted-foreground mt-2">Fresh deals on organic produce</p>
             </div>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 bg-destructive/10 text-destructive px-4 py-2 rounded-full">
-                <Timer className="h-4 w-4" />
-                <span className="font-medium">Ends in 24:00:00</span>
-              </div>
               <Link href="/products">
                 <Button variant="ghost" className="text-primary hover:text-primary/80">
                   View All
@@ -43,11 +39,11 @@ const page = () => {
             </div>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {featuredProducts.slice(0, 4).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
-          </div>
+          </div> */}
         </div>
       </section>
 
@@ -105,11 +101,7 @@ const page = () => {
             </Link>
           </div>
           
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {categories.map((category) => (
-              <CategoryCard key={category.id} category={category} />
-            ))}
-          </div>
+          <CategoriesSection />
         </div>
       </section>
 
@@ -129,11 +121,11 @@ const page = () => {
             </Link>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {featuredProducts.slice(4, 8).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
-          </div>
+          </div> */}
         </div>
       </section>
 

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Layout } from '@/components/layout/Layout';
@@ -15,6 +14,34 @@ export default function Cart() {
   const { items, totalItems, totalPrice, updateQuantity, removeItem } = useCart();
   const [modal, setModal] = useState<'none' | 'login' | 'signup'>('none');
 
+  // Move all hooks before any conditional returns
+  useEffect(() => {
+    if (modal !== 'none') document.body.classList.add('overflow-hidden');
+    else document.body.classList.remove('overflow-hidden');
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setModal('none');
+    };
+
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [modal]);
+
+  const handleCheckout = async () => {
+    const isAuthenticated = await checkAuth();
+    console.log('User authenticated:', isAuthenticated);
+    if (isAuthenticated) {
+      // Redirect to checkout page
+      window.location.href = '/checkout';
+    } else {
+      setModal('login');
+    }
+  };
+
+  // Now check for empty cart after all hooks are called
   if (items.length === 0) {
     return (
       <Layout>
@@ -39,32 +66,6 @@ export default function Cart() {
     );
   }
 
-  const handleCheckout = async () => {
-    const isAuthenticated = await checkAuth();
-    console.log('User authenticated:', isAuthenticated);
-    if (isAuthenticated) {
-      // Redirect to checkout page
-      window.location.href = '/checkout';
-    } else {
-      setModal('login');
-    }
-  }
-
-  useEffect(() => {
-    if (modal !== 'none') document.body.classList.add('overflow-hidden');
-    else document.body.classList.remove('overflow-hidden');
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setModal('none');
-    };
-
-    window.addEventListener('keydown', onKey);
-    return () => {
-      document.body.classList.remove('overflow-hidden');
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [modal]);
-
   return (
     <Layout>
       <div className="container-custom py-8">
@@ -80,13 +81,13 @@ export default function Cart() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
-            {items.map((item) => (
+            {items?.map((item) => (
               <div
-                key={item.product.id}
+                key={item.product.reference_id}
                 className="bg-card p-4 sm:p-6 rounded-2xl shadow-card flex flex-col sm:flex-row gap-4"
               >
                 {/* Image */}
-                <Link href={`/product/${item.product.id}`} className="shrink-0">
+                <Link href={`/product/${item.product.reference_id}`} className="shrink-0">
                   <img
                     src={item.product.image}
                     alt={item.product.name}
@@ -96,7 +97,7 @@ export default function Cart() {
 
                 {/* Details */}
                 <div className="flex-1 min-w-0">
-                  <Link href={`/product/${item.product.id}`}>
+                  <Link href={`/product/${item.product.reference_id}`}>
                     <h3 className="font-semibold text-foreground hover:text-primary transition-colors">
                       {item.product.name}
                     </h3>
@@ -104,9 +105,9 @@ export default function Cart() {
                   <p className="text-sm text-muted-foreground">{item.product.unit}</p>
                   <div className="flex items-center gap-2 mt-2">
                     <span className="font-bold text-primary">रू {item.product.price}</span>
-                    {item.product.originalPrice && (
+                    {item.product.price && (
                       <span className="text-sm text-muted-foreground line-through">
-                        रू {item.product.originalPrice}
+                        रू {item.product.price}
                       </span>
                     )}
                   </div>
@@ -119,7 +120,7 @@ export default function Cart() {
                       variant="outline"
                       size="icon"
                       className="h-8 w-8"
-                      onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                      onClick={() => updateQuantity(item.product.reference_id, item.quantity - 1)}
                     >
                       <Minus className="h-3 w-3" />
                     </Button>
@@ -128,18 +129,18 @@ export default function Cart() {
                       variant="outline"
                       size="icon"
                       className="h-8 w-8"
-                      onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                      onClick={() => updateQuantity(item.product.reference_id, item.quantity + 1)}
                     >
                       <Plus className="h-3 w-3" />
                     </Button>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className="font-bold text-lg">रू {item.product.price * item.quantity}</span>
+                    <span className="font-bold text-lg">रू {Number(item.product.price) * item.quantity}</span>
                     <Button
                       variant="ghost"
                       size="icon"
                       className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                      onClick={() => removeItem(item.product.id)}
+                      onClick={() => removeItem(item.product.reference_id)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

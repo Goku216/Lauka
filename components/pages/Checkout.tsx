@@ -323,7 +323,7 @@ export default function Checkout() {
                 
                 <div className="space-y-4 mb-6 max-h-64 overflow-y-auto">
                   {items.map((item) => (
-                    <div key={item.product.id} className="flex gap-3">
+                    <div key={item.product.reference_id} className="flex gap-3">
                       <img
                         src={item.product.image}
                         alt={item.product.name}
@@ -333,7 +333,7 @@ export default function Checkout() {
                         <p className="font-medium text-sm truncate">{item.product.name}</p>
                         <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
                         <p className="text-sm font-semibold text-primary">
-                          रू {item.product.price * item.quantity}
+                          रू {Number(item.product.price) * item.quantity}
                         </p>
                       </div>
                     </div>

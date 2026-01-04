@@ -1,22 +1,16 @@
 import { Apple, Carrot, TreeDeciduous, Leaf, Milk, Wheat, LucideIcon } from 'lucide-react';
 import { Category } from '@/types';
 import Link from 'next/link';
+import { ICON_MAP } from '@/extras/icon-map';
+import { CategoryResponse } from '@/service/productApi';
 
-const iconMap: Record<string, LucideIcon> = {
-  Apple,
-  Carrot,
-  TreeDeciduous,
-  Leaf,
-  Milk,
-  Wheat,
-};
 
 interface CategoryCardProps {
-  category: Category;
+  category: CategoryResponse;
 }
 
 export function CategoryCard({ category }: CategoryCardProps) {
-  const Icon = iconMap[category.icon] || Leaf;
+  const Icon = ICON_MAP[category.icon] || Leaf;
 
   return (
     <Link
@@ -27,7 +21,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
         <Icon className="h-8 w-8 text-accent-foreground group-hover:text-primary-foreground transition-colors" />
       </div>
       <h3 className="font-semibold text-foreground text-center mb-1">{category.name}</h3>
-      <p className="text-sm text-muted-foreground">{category.productCount} items</p>
+      <p className="text-sm text-muted-foreground">{category.product_count} items</p>
     </Link>
   );
 }

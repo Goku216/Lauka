@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
 import Link from 'next/link';
+import { ProductResponse } from '@/service/productApi';
 
 interface ProductCardProps {
-  product: Product;
+  product: ProductResponse;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
@@ -17,7 +18,7 @@ export function ProductCard({ product }: ProductCardProps) {
     <div className="card-product group overflow-hidden">
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-muted">
-        <Link href={`/products/${product.id}`}>
+        <Link href={`/products/${product.reference_id}`}>
           <img
             src={product.image}
             alt={product.name}
@@ -27,10 +28,10 @@ export function ProductCard({ product }: ProductCardProps) {
         
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
-          {product.discount && (
-            <span className="badge-discount">{product.discount}% OFF</span>
+          {product.discount_price && (
+            <span className="badge-discount">{product.discount_price}% OFF</span>
           )}
-          {product.isNew && (
+          {product.is_new && (
             <span className="badge-new">NEW</span>
           )}
         </div>
@@ -45,7 +46,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <Button
             onClick={() => addItem(product)}
             className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-full"
-            disabled={!product.inStock}
+            disabled={!product.in_stock}
           >
             <ShoppingCart className="h-4 w-4 mr-2" />
             Add to Cart
@@ -55,7 +56,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
       {/* Content */}
       <div className="p-4">
-        <Link href={`/product/${product.id}`}>
+        <Link href={`/product/${product.reference_id}`}>
           <h3 className="font-semibold text-foreground hover:text-primary transition-colors line-clamp-2 mb-1">
             {product.name}
           </h3>
@@ -72,15 +73,26 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Price */}
         <div className="flex items-center gap-2">
-          <span className="text-lg font-bold text-primary">रू {product.price}</span>
-          {product.originalPrice && (
+         
+          {product.discount_price ? (
+             <>
+             <span className="text-lg font-bold text-primary">रू {product.discount_price}</span>
+          {product.price && (
             <span className="text-sm text-muted-foreground line-through">
-              रू {product.originalPrice}
+              रू {product.price}
             </span>
           )}
+          </>
+
+          ) : (
+            <>
+              <span className="text-lg font-bold text-primary">रू {product.price}</span>
+            </>
+          )}
+         
         </div>
 
-        {!product.inStock && (
+        {!product.in_stock && (
           <p className="text-sm text-destructive mt-2">Out of Stock</p>
         )}
       </div>

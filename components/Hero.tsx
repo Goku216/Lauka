@@ -5,10 +5,10 @@ import Link from 'next/link';
 export function Hero() {
   return (
     <section className="relative overflow-hidden bg-linear-to-br from-fresh-light via-background to-lemon-light">
-      <div className="container-custom py-16 lg:py-24">
+      <div className="container-custom py-8 md:py-16 lg:py-24">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Content */}
-          <div className="space-y-6 animate-fade-in">
+          <div className="space-y-6 animate-fade-in text-center md:text-start">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
               <Leaf className="h-4 w-4" />
               100% Natural & Organic
@@ -27,13 +27,13 @@ export function Hero() {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/products">
-                <Button className="btn-primary text-lg px-8">
+                <Button className="btn-primary text-lg px-10 py-7">
                   Shop Now
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Link href="/about">
-                <Button variant="outline" className="text-lg px-8 rounded-full border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                <Button variant="outline" className="text-lg px-10 py-7 rounded-full border-primary text-primary hover:bg-primary hover:text-primary-foreground">
                   Learn More
                 </Button>
               </Link>

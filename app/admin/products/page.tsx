@@ -10,7 +10,6 @@ import { Switch } from '@/components/ui/switch';
 import { DataTable } from '@/components/Admin/DataTable';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { mockCategories } from '@/lib/mock-data';
 import { Plus, Pencil, Trash2, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { AdminLayout } from '@/components/Admin/AdminLayout';
 import { productApi, ProductResponse, ProductFormData } from '@/service/productApi';
@@ -18,8 +17,6 @@ import { validateProductForm, validateProductFiles, ValidationError } from '@/li
 import { toast } from 'sonner';
 import { getCategories } from '@/service/categoryApi';
 import { Categories } from '@/types/productTypes';
-import { set } from 'zod';
-import { is } from 'zod/v4/locales';
 
 
 
@@ -64,7 +61,6 @@ export default function Products() {
   useEffect(() => {
     fetchProducts();
     fetchCategories();
-    console.log("From fetch product", products)
   }, [currentPage]);
 
 
@@ -105,8 +101,6 @@ export default function Products() {
 const matchedCategory = categories.find(
   (category) => category.slug === product?.category
 );
-
-console.log("Fixing category:", matchedCategory?.name);
     
     if (product) {
       setEditingProduct(product);
