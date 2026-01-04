@@ -3,23 +3,13 @@ import { CategoryResponse } from "./productApi";
 
 
 
-export const getCategories = async (params?: {
-    page?: number;
-    limit?: number;
-    category?: string;
-    search?: string;
-  }): Promise<{ categories: CategoryResponse[]; total: number }> => {
-     const queryParams = new URLSearchParams();
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('page_size', params.limit.toString()); // Changed from 'limit' to 'page_size'
-    if (params?.category) queryParams.append('category', params.category);
-    if (params?.search) queryParams.append('search', params.search);
+export const getCategories = async (): Promise<{ categories: CategoryResponse[] }> => {
     try {
-        const response = await apiClient.get<any>(`/categories/?${queryParams}`);
-        console.log('Categories response:', response.results);
+        const response = await apiClient.get<any>(`/categories/`);
+       
          return {
-      categories: response.results || [],
-      total: response.count || 0,
+      categories: response || [],
+    
     };
     } catch (error: any) {
         throw new Error(error.response?.data?.detail || "Failed to fetch categories");

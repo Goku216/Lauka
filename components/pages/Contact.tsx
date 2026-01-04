@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
 import { useState } from 'react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
+
 
 export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,21 +22,14 @@ export default function Contact() {
     e.preventDefault();
     
     if (!form.name || !form.message) {
-      toast({
-        title: 'Please fill required fields',
-        description: 'Name and message are required.',
-        variant: 'destructive',
-      });
+      toast.error( 'Please fill required fields');
       return;
     }
 
     setIsSubmitting(true);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     
-    toast({
-      title: 'Message Sent!',
-      description: 'Thank you for contacting us. We will get back to you soon.',
-    });
+    toast.success('Thank you for contacting us. We will get back to you soon.');
     
     setForm({ name: '', email: '', phone: '', message: '' });
     setIsSubmitting(false);

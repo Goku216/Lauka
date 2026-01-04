@@ -7,11 +7,10 @@ import { DataTable } from '@/components/Admin/DataTable';
 import { mockUsers } from '@/lib/mock-data';
 import { User } from '@/types/AdminPageTypes';
 import { Ban, CheckCircle } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { AdminLayout } from '@/components/Admin/AdminLayout';
+import { toast } from 'sonner';
 
 export default function Users() {
-  const { toast } = useToast();
   const [users, setUsers] = useState<User[]>(mockUsers);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -19,10 +18,7 @@ export default function Users() {
     setUsers(users.map(user => {
       if (user.id === userId) {
         const newStatus = user.status === 'active' ? 'banned' : 'active';
-        toast({
-          title: newStatus === 'banned' ? 'User banned' : 'User unbanned',
-          description: `${user.name} has been ${newStatus === 'banned' ? 'banned' : 'reactivated'}.`,
-        });
+        toast.success(`${user.name} has been ${newStatus === 'banned' ? 'banned' : 'reactivated'}.`);
         return { ...user, status: newStatus };
       }
       return user;

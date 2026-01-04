@@ -2,7 +2,8 @@
 
 import  { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { CartItem, Product } from '@/types';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
+
 
 interface CartState {
   items: CartItem[];
@@ -105,10 +106,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = (product: Product) => {
     dispatch({ type: 'ADD_ITEM', payload: product });
-    toast({
-      title: "Added to cart!",
-      description: `${product.name} has been added to your cart.`,
-    });
+    toast.success(`${product.name} has been added to your cart.`);
   };
 
   const removeItem = (productId: string) => {

@@ -29,7 +29,7 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
           {product.discount_price && (
-            <span className="badge-discount">{product.discount_price}% OFF</span>
+            <span className="badge-discount">{product.discount_percentage}% OFF</span>
           )}
           {product.is_new && (
             <span className="badge-new">NEW</span>

@@ -16,22 +16,27 @@ export interface RegisterPayload {
     password: string;
 }
 
-export const login = async (data: LoginPayload): Promise<any> => {
-    try {
-        const response = await apiClient.post<any>("/auth/login/", data);
-       
-        return response.message;
-    } catch (error: any) {
-        throw new Error(error.response?.data?.detail || "Login failed");
-    }
-};
+export const login = async (data: LoginPayload) => {
+  try {
+    const response = await apiClient.post<any>("/auth/login/", data)
+    return response.data
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      "Login failed"
+
+    throw new Error(message)
+  }
+}
+
 
 export const registerUser = async (data: RegisterPayload): Promise<any> => {
     try {
         const response = await apiClient.post<any>("/auth/register/", data);
         return response.data;
     } catch (error: any) {
-        throw new Error(error.response?.data?.detail || "Registration failed");
+        throw new Error(error.response?.data?.message || "Registration failed");
     }   
 };
 
@@ -40,7 +45,7 @@ export const checkAuth = async (): Promise<any> => {
         const response = await apiClient.get<any>("/auth/me");
         return response.isAuthenticated;
     } catch (error: any) {
-        throw new Error(error.response?.data?.detail || "Authentication check failed");
+        throw new Error(error.response?.data?.message || "Authentication check failed");
     }   
 };
 
@@ -48,7 +53,23 @@ export const logout = async (): Promise<void> => {
     try {
         await apiClient.post("/auth/logout/");
     } catch (error: any) {
-        throw new Error(error.response?.data?.detail || "Logout failed");
+        throw new Error(error.response?.data?.message || "Logout failed");
     }   
 };
+
+export const resendVerification = async (email: string): Promise<any> => {
+    try {
+        const response = await apiClient.post("/auth/resend-verification/", {
+            email: email
+        })
+        return response
+    } catch(error: any) {
+        const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      "Failed Sending Verification"
+
+    throw new Error(message)
+    }
+}
 

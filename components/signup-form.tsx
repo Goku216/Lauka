@@ -24,6 +24,7 @@
 import { registerUser } from "@/service/api"
 import { toast } from "sonner"
 import { Mail } from "lucide-react"
+import VerificationPendingModal from "./VerificationPendingModal"
 
   type SignupFormProps = React.ComponentProps<"div"> & {
     onSwitch?: () => void;
@@ -64,6 +65,8 @@ import { Mail } from "lucide-react"
       try {
 
         const response = await registerUser({username: values.name, email: values.email, password: values.password});
+
+        console.log()
         
         if(response?.error){
           toast.error(response.error);
@@ -92,46 +95,7 @@ import { Mail } from "lucide-react"
 
     if (isVerificationPending) {
       return (
-        <div className={cn("flex flex-col gap-6", className)} {...props}>
-          <Card>
-            <CardHeader className="text-center">
-              <div className="flex justify-center mb-4">
-                <div className="bg-primary/10 p-3 rounded-full">
-                  <Mail className="h-8 w-8 text-primary" />
-                </div>
-              </div>
-              <CardTitle className="text-xl">Verify your email</CardTitle>
-              <CardDescription>
-                A verification link has been sent to <span className="font-semibold text-foreground">{verificationEmail}</span>
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground text-center">
-                Please click the link in the email to verify your account and complete your registration.
-              </p>
-              <p className="text-xs text-muted-foreground text-center">
-                Didn't receive the email? Check your spam folder or{' '}
-                <button
-                  type="button"
-                  onClick={() => setIsVerificationPending(false)}
-                  className="text-primary underline hover:text-primary/80"
-                >
-                  go back to sign up
-                </button>
-              </p>
-              <Button 
-                onClick={() => {
-                  setIsVerificationPending(false)
-                  reset()
-                }}
-                variant="outline"
-                className="w-full"
-              >
-                Back to Sign Up
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+        <VerificationPendingModal reset={reset} setIsVerificationPending={setIsVerificationPending} verificationEmail={verificationEmail} />
       )
     }
 

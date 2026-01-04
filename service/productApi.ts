@@ -50,6 +50,8 @@ export interface ProductResponse {
   is_new?: boolean;
   rating?: number;
   reviews?: number;
+  discount_percentage?: number;
+
 }
 
 class ProductApi {

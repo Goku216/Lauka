@@ -21,7 +21,11 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 
 import { toast } from "sonner"
-import { login } from "@/service/api"
+import { login, resendVerification } from "@/service/api"
+import { useState } from "react"
+
+import ForgotPasswordModal from "./ForgotPasswordModal"
+import VerificationPendingModal from "./VerificationPendingModal"
 
 type LoginFormProps = React.ComponentProps<"div"> & {
   onSwitch?: () => void;
@@ -50,13 +54,17 @@ export function LoginForm({
     resolver: zodResolver(loginSchema),
   })
 
+  const [forgotPassowrd, setForgotPassword] = useState(false);
+  const [isVerificationPending, setIsVerificationPending] = useState(false)
+  const [verificationEmail, setVerificationEmail] = useState("")
+
   async function onSubmit(values: LoginFormValues) {
     try {
-      console.log('Starting login with:', values)
       const response = await login({ email: values.email, password: values.password })
       
       console.log('Login response:', response)
 
+    
       if (response?.error) {
         toast.error(response.error)
         return
@@ -71,11 +79,39 @@ export function LoginForm({
       onLoginSuccess?.()
       window.location.reload();
       toast.success("Logged In Successfully")
-    } catch (error) {
+    } catch (error : any) {
       console.error('Login error:', error)
-      toast.error("Login failed. Please try again.")
+      toast.error(error.message || "Something went wrong")
+      if(error.message === "User account is disabled.") {
+          setIsVerificationPending(true)
+          setVerificationEmail(values.email)
+          resendVerificationEmail()
+      }
+      
     }
   }
+
+  const resendVerificationEmail = async () => {
+    try {
+      await resendVerification(verificationEmail)
+    } catch(error: any) {
+      toast.error(error.message)
+    }
+  }
+
+  if(forgotPassowrd) {
+    return (
+    <ForgotPasswordModal setForgotPassword={setForgotPassword}/>
+    )
+  }
+
+  if(isVerificationPending) {
+    return (
+      <VerificationPendingModal reset={reset} setIsVerificationPending={setIsVerificationPending} verificationEmail={verificationEmail} />
+    )
+  }
+
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -105,12 +141,12 @@ export function LoginForm({
               <Field>
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <a
-                    href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                  <p
+                    onClick={() => setForgotPassword(true)}
+                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline cursor-pointer"
                   >
                     Forgot your password?
-                  </a>
+                  </p>
                 </div>
                 <Input 
                   id="password" 

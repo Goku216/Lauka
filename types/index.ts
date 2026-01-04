@@ -1,22 +1,23 @@
 import { ProductImage } from "@/service/productApi";
 
 export interface Product {
- reference_id: string;
-   name: string;
-   description: string;
-   price: string;
-   discount_price: string;
-   stock: number;
-   image: string;
-   unit: string;
-   images: ProductImage[];
-   tags: string;
-   in_stock: boolean;
-   category: string;
-   is_featured?: boolean;
-   is_new?: boolean;
-   rating?: number;
-   reviews?: number;
+  reference_id: string;
+  name: string;
+  description: string;
+  price: string;
+  discount_price: string;
+  stock: number;
+  image: string;
+  unit: string;
+  images: ProductImage[];
+  tags: string;
+  in_stock: boolean;
+  category: string;
+  is_featured?: boolean;
+  is_new?: boolean;
+  rating?: number;
+  reviews?: number;
+  discount_percentage?: number;
 }
 
 export interface Category {
@@ -35,7 +36,7 @@ export interface CartItem {
 export interface CheckoutForm {
   fullName: string;
   phone: string;
-  email: string;
+  email?: string;
   address: string;
   district: string;
   city: string;

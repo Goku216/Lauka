@@ -4,15 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/lib/auth-context';
-import { useToast } from '@/hooks/use-toast';
+
 import { User, Lock, Bell, Palette } from 'lucide-react';
 import { AdminLayout } from '@/components/Admin/AdminLayout';
+import { toast } from 'sonner';
 
 export default function Settings() {
   const { user } = useAuth();
-  const { toast } = useToast();
   
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
@@ -27,26 +26,16 @@ export default function Settings() {
 
   const handleProfileUpdate = (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: 'Profile updated',
-      description: 'Your profile has been updated successfully.',
-    });
+    toast.success('Your profile has been updated successfully.')
   };
 
   const handlePasswordUpdate = (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast({
-        title: 'Error',
-        description: 'Passwords do not match.',
-        variant: 'destructive',
-      });
+      toast.error('Passwords do not match.');
       return;
     }
-    toast({
-      title: 'Password updated',
-      description: 'Your password has been changed successfully.',
-    });
+    toast.success('Your password has been changed successfully.');
     setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
   };
 

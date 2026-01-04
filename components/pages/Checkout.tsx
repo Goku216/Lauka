@@ -9,12 +9,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCart } from '@/context/CartContext';
 import { LUMBINI_DISTRICTS, CheckoutForm } from '@/types';
-import { toast } from '@/hooks/use-toast';
 import { MapPin, Truck, ShoppingBag, CheckCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import Protected from '../Protected';
+import { toast } from 'sonner';
+import { bulkAddToCart, cartPayload, createOrder, OrderPayload } from '@/service/OrderApi';
 
 export default function Checkout() {
   const { items, totalPrice, clearCart } = useCart();
@@ -23,6 +24,7 @@ export default function Checkout() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
+  
   const [form, setForm] = useState<CheckoutForm>({
     fullName: '',
     phone: '',
@@ -38,6 +40,7 @@ export default function Checkout() {
     if (isAuthenticated === false) {
       router.push('/');
     }
+    console.log(items)
   }, [isAuthenticated, router]);
 
   if (items.length === 0 && !orderPlaced) {
@@ -122,28 +125,41 @@ export default function Checkout() {
     e.preventDefault();
     
     if (!validateForm()) {
-      toast({
-        title: 'Please fix the errors',
-        description: 'Some required fields are missing or invalid.',
-        variant: 'destructive',
-      });
+      toast.error('Some required fields are missing or invalid.',);
       return;
     }
 
     setIsSubmitting(true);
 
-    // Simulate order processing
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+     
+    const cartPayload: cartPayload[] = items.map(item => ({
+      product_reference_id: item.product.reference_id,
+      quantity: item.quantity
+    }))
+    
+    const cartResponse = await bulkAddToCart(cartPayload)
+
+    console.log(cartResponse)
+
+    const orderPayload: OrderPayload = {
+      full_name: form.fullName,
+      city: form.city,
+      district: form.district,
+      phone_number: form.phone,
+      shipping_address: form.address,
+      email: form.email,
+      order_notes: form.notes
+    }
+
+    const orderResponse = await createOrder(orderPayload)
+    console.log(orderResponse)
 
     const newOrderNumber = `LO-${Date.now().toString().slice(-8)}`;
     setOrderNumber(newOrderNumber);
     clearCart();
     setOrderPlaced(true);
 
-    toast({
-      title: 'Order Placed!',
-      description: `Your order ${newOrderNumber} has been placed successfully.`,
-    });
+    toast.success(orderResponse.message);
 
     setIsSubmitting(false);
   };

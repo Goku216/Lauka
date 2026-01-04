@@ -135,7 +135,7 @@ export default function Products() {
       if (!response.ok) throw new Error('Failed to fetch products');
       
       const data: PaginatedResponse = await response.json();
-      
+      console.log("Productrs; ", data.results)
       setProducts(data.results);
       setTotalCount(data.count);
       setNextPage(data.next);
