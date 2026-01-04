@@ -1,3 +1,5 @@
+import { IconName } from "@/extras/icon-map";
+
 // API service for product operations
 const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_API || 'http://localhost:3000/api';
 
@@ -5,14 +7,16 @@ export interface ProductFormData {
   name: string;
   description: string;
   price: number;
+  unit: string;
   stock: number;
-  is_available: boolean;
+  in_stock: boolean;
   category: string; // UUID reference_id of category
-  sku: string;
   discount_price?: number;
   tags?: string[]; // Will be converted to comma-separated string for backend
-  thumbnail?: File;
+  image?: File;
   additional_images?: File[]; // Will be sent as 'images' to backend
+  is_featured?: boolean;
+  is_new?: boolean;
 }
 
 export interface ProductImage {
@@ -24,21 +28,26 @@ export interface CategoryResponse {
   reference_id: string;
   name: string;
   is_active: boolean;
+  slug: string;
+  icon: IconName;
+  product_count: number;
 }
 
 export interface ProductResponse {
   reference_id: string;
-  sku: string;
   name: string;
   description: string;
   price: string;
   discount_price: string;
   stock: number;
-  thumbnail: string;
+  image: string;
+  unit: string;
   images: ProductImage[];
   tags: string;
-  is_available: boolean;
-  category: CategoryResponse;
+  in_stock: boolean;
+  category: string;
+  is_featured?: boolean;
+  is_new?: boolean;
 }
 
 class ProductApi {
@@ -99,9 +108,9 @@ class ProductApi {
     formData.append('description', data.description);
     formData.append('price', data.price.toString());
     formData.append('stock', data.stock.toString());
-    formData.append('is_available', data.is_available.toString());
+    formData.append('in_stock', data.in_stock.toString());
     formData.append('category', data.category);
-    formData.append('sku', data.sku);
+    
     
     if (data.discount_price !== undefined) {
       formData.append('discount_price', data.discount_price.toString());
@@ -111,8 +120,20 @@ class ProductApi {
       formData.append('tags', data.tags.join(','));
     }
     
-    if (data.thumbnail) {
-      formData.append('thumbnail', data.thumbnail);
+    if (data.image) {
+      formData.append('image', data.image);
+    }
+
+    if(data.unit){
+      formData.append('unit',data.unit)
+    }
+
+    if(data.is_featured){
+      formData.append('is_featured', data.is_featured.toString())
+    }
+    
+    if(data.is_new){
+      formData.append('is_new', data.is_new.toString())
     }
     
     // Send as 'images' instead of 'additional_images'
@@ -144,17 +165,16 @@ class ProductApi {
     if (data.description) formData.append('description', data.description);
     if (data.price !== undefined) formData.append('price', data.price.toString());
     if (data.stock !== undefined) formData.append('stock', data.stock.toString());
-    if (data.is_available !== undefined) formData.append('is_available', data.is_available.toString());
+    if (data.in_stock !== undefined) formData.append('in_stock', data.in_stock.toString());
     if (data.category) formData.append('category', data.category);
-    if (data.sku) formData.append('sku', data.sku);
     if (data.discount_price !== undefined) formData.append('discount_price', data.discount_price.toString());
     
     if (data.tags && data.tags.length > 0) {
       formData.append('tags', data.tags.join(','));
     }
-    
-    if (data.thumbnail) {
-      formData.append('thumbnail', data.thumbnail);
+
+    if (data.image) {
+      formData.append('image', data.image);
     }
     
     // Send as 'images' instead of 'additional_images'
@@ -180,7 +200,7 @@ class ProductApi {
 
   // Delete product
   async deleteProduct(id: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/products/${id}/delete/`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

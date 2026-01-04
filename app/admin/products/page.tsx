@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { getCategories } from '@/service/categoryApi';
 import { Categories } from '@/types/productTypes';
 import { set } from 'zod';
+import { is } from 'zod/v4/locales';
 
 
 
@@ -32,6 +33,8 @@ export default function Products() {
   const [editingProduct, setEditingProduct] = useState<ProductResponse | null>(null);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [categories, setCategories] = useState<Categories[]>([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const additionalImagesInputRef = useRef<HTMLInputElement>(null);
@@ -42,11 +45,13 @@ export default function Products() {
     description: '',
     price: '',
     stock: '',
-    is_available: true,
+    in_stock: true,
     category: '',
-    sku: '',
     discount_price: '',
     tags: '',
+    unit: '',
+    is_featured: false,
+    is_new: false,
   });
 
   const [thumbnail, setThumbnail] = useState<File | null>(null);
@@ -59,15 +64,14 @@ export default function Products() {
   useEffect(() => {
     fetchProducts();
     fetchCategories();
-    console.log('Categories loaded in useEffect:', categories);
+    console.log("From fetch product", products)
   }, [currentPage]);
 
 
   const fetchCategories = async () => {
     try { 
-      const categories = await getCategories();
+      const {categories} = await getCategories();
       setCategories(categories);
-      console.log('Fetched categories:', categories);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
     }
@@ -81,6 +85,8 @@ export default function Products() {
         limit: 10,
       });
       setProducts(response.products || []);
+      console.log(response.products)
+      
       setTotalItems(response.total || 0);
     } catch (error) {
       console.error('Failed to fetch products:', error);
@@ -89,11 +95,18 @@ export default function Products() {
       setTotalItems(0);
     } finally {
       setLoading(false);
+      
     }
   };
 
   const handleOpenModal = (product?: ProductResponse) => {
     setValidationErrors([]);
+
+const matchedCategory = categories.find(
+  (category) => category.slug === product?.category
+);
+
+console.log("Fixing category:", matchedCategory?.name);
     
     if (product) {
       setEditingProduct(product);
@@ -102,13 +115,15 @@ export default function Products() {
         description: product.description,
         price: product.price.toString(),
         stock: product.stock.toString(),
-        is_available: product.is_available,
-        category: product.category.reference_id, // Use reference_id from category object
-        sku: product.sku,
+        in_stock: product.in_stock,
+        category: matchedCategory?.reference_id || "", // Use reference_id from category object
         discount_price: product.discount_price ? product.discount_price.toString() : '',
         tags: product.tags || '',
+        unit: product.unit || '',
+        is_featured: product.is_featured || false,
+        is_new: product.is_new || false,
       });
-      setThumbnailPreview(product.thumbnail || '');
+      setThumbnailPreview(product.image || '');
       // Convert images array to preview URLs
       setAdditionalImagePreviews(
         product.images ? product.images.map(img => img.image) : []
@@ -126,11 +141,13 @@ export default function Products() {
       description: '',
       price: '',
       stock: '',
-      is_available: true,
+      in_stock: true,
       category: '',
-      sku: '',
       discount_price: '',
       tags: '',
+      unit: '',
+      is_featured: false,
+      is_new: false,
     });
     setThumbnail(null);
     setThumbnailPreview('');
@@ -202,14 +219,17 @@ export default function Products() {
         description: formData.description.trim(),
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
-        is_available: formData.is_available,
+        in_stock: formData.in_stock,
         category: formData.category,
-        sku: formData.sku.trim().toUpperCase(),
         discount_price: formData.discount_price ? parseFloat(formData.discount_price) : undefined,
         tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(t => t) : undefined,
-        thumbnail: thumbnail || undefined,
+        image: thumbnail || undefined,
         additional_images: additionalImages.length > 0 ? additionalImages : undefined,
+        unit: formData.unit.trim(),
+        is_featured: formData.is_featured,
+        is_new: formData.is_new,
       };
+      console.log('Submitting product with data:', apiData);
 
       if (editingProduct) {
         await productApi.updateProduct(editingProduct.reference_id, apiData);
@@ -231,15 +251,24 @@ export default function Products() {
   };
 
   const handleDelete = async (reference_id: string) => {
-    if (!confirm('Are you sure you want to delete this product?')) return;
+    // Open confirmation dialog and store the id to delete if confirmed
+    setPendingDeleteId(reference_id);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteId) return;
 
     try {
-      await productApi.deleteProduct(reference_id);
+      await productApi.deleteProduct(pendingDeleteId);
       toast.success('Product deleted successfully');
       fetchProducts();
     } catch (error) {
       console.error('Failed to delete product:', error);
       toast.error('Failed to delete product. Please try again.');
+    } finally {
+      setShowDeleteConfirm(false);
+      setPendingDeleteId(null);
     }
   };
 
@@ -249,9 +278,9 @@ export default function Products() {
       title: 'Name',
       render: (product: ProductResponse) => (
         <div className="flex items-center gap-3">
-          {product.thumbnail && (
+          {product.image && (
             <img 
-              src={product.thumbnail} 
+              src={product.image} 
               alt={product.name}
               className="w-10 h-10 rounded-md object-cover"
             />
@@ -260,7 +289,6 @@ export default function Products() {
         </div>
       ),
     },
-    { key: 'sku', title: 'SKU' },
     { 
       key: 'price', 
       title: 'Price',
@@ -280,8 +308,8 @@ export default function Products() {
       key: 'is_available',
       title: 'Status',
       render: (product: ProductResponse) => (
-        <Badge variant={product.is_available ? 'default' : 'secondary'}>
-          {product.is_available ? 'Available' : 'Unavailable'}
+        <Badge variant={product.in_stock ? 'default' : 'secondary'}>
+          {product.in_stock ? 'Available' : 'Unavailable'}
         </Badge>
       ),
     },
@@ -290,7 +318,7 @@ export default function Products() {
       title: 'Category',
       render: (product: ProductResponse) => (
         <Badge variant="outline">
-          {product.category.name}
+          {product.category}
         </Badge>
       ),
     },
@@ -425,25 +453,6 @@ export default function Products() {
                 )}
               </div>
 
-              {/* SKU */}
-              <div className="space-y-2">
-                <Label htmlFor="sku">
-                  SKU <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="sku"
-                  value={formData.sku}
-                  onChange={(e) => setFormData({ ...formData, sku: e.target.value.toUpperCase() })}
-                  placeholder="e.g., PRD123"
-                  className={getFieldError('sku') ? 'border-destructive' : ''}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Letters, numbers, hyphens, and underscores only
-                </p>
-                {getFieldError('sku') && (
-                  <p className="text-sm text-destructive">{getFieldError('sku')}</p>
-                )}
-              </div>
 
               {/* Price and Discount Price */}
               <div className="grid grid-cols-2 gap-4">
@@ -528,6 +537,21 @@ export default function Products() {
                 )}
               </div>
 
+              {/* Unit */}
+              <div className="space-y-2">
+                <Label htmlFor="unit">Unit</Label>
+                <Input
+                  id="unit"
+                  value={formData.unit}
+                  onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                  placeholder="e.g., kg, pcs, liters"
+                  className={getFieldError('unit') ? 'border-destructive' : ''}
+                />
+                {getFieldError('unit') && (
+                  <p className="text-sm text-destructive">{getFieldError('unit')}</p>
+                )}
+              </div>
+
               {/* Tags */}
               <div className="space-y-2">
                 <Label htmlFor="tags">Tags</Label>
@@ -556,9 +580,9 @@ export default function Products() {
                 </div>
                 <Switch
                   id="is_available"
-                  checked={formData.is_available}
+                  checked={formData.in_stock}
                   onCheckedChange={(checked) => 
-                    setFormData({ ...formData, is_available: checked })
+                    setFormData({ ...formData, in_stock: checked })
                   }
                 />
               </div>
@@ -651,6 +675,40 @@ export default function Products() {
                   )}
                 </div>
               </div>
+
+              {/* Additional options */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="is_featured">Featured Product</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Mark this product as featured
+                    </p>
+                  </div>
+                  <Switch
+                    id="is_featured"
+                    checked={formData.is_featured}
+                    onCheckedChange={(checked) => 
+                      setFormData({ ...formData, is_featured: checked })
+                    }
+                  />
+                </div>
+                <div className="flex items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="is_new">New Arrival</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Mark this product as a new arrival
+                    </p>
+                  </div>
+                  <Switch
+                    id="is_new"
+                    checked={formData.is_new}
+                    onCheckedChange={(checked) => 
+                      setFormData({ ...formData, is_new: checked })
+                    }
+                  />
+                </div>
+              </div>
             </div>
 
             <DialogFooter>
@@ -675,6 +733,21 @@ export default function Products() {
           </DialogContent>
         </Dialog>
       </div>
+      {showDeleteConfirm && (
+        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <DialogContent>
+            
+              <div className="flex flex-col">
+                <p>Are you sure you want to delete this product?</p>
+                <div className="flex justify-end gap-4 mt-6">
+                  <Button variant="outline" onClick={() => setShowDeleteConfirm(false)} >Cancel</Button>
+                  <Button variant="destructive" onClick={confirmDelete} >Delete</Button>
+                </div>
+              
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </AdminLayout>
   );
 }

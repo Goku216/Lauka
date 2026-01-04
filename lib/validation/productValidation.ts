@@ -10,7 +10,6 @@ export interface ProductValidationData {
   description: string;
   price: string;
   stock: string;
-  sku: string;
   category: string;
   discount_price?: string;
   tags?: string;
@@ -65,17 +64,6 @@ export const validateProductForm = (data: ProductValidationData): ValidationErro
     } else if (!Number.isInteger(stockNum)) {
       errors.push({ field: 'stock', message: 'Stock must be a whole number' });
     }
-  }
-
-  // SKU validation
-  if (!data.sku || data.sku.trim().length === 0) {
-    errors.push({ field: 'sku', message: 'SKU is required' });
-  } else if (data.sku.length < 3) {
-    errors.push({ field: 'sku', message: 'SKU must be at least 3 characters' });
-  } else if (data.sku.length > 50) {
-    errors.push({ field: 'sku', message: 'SKU must not exceed 50 characters' });
-  } else if (!/^[A-Z0-9-_]+$/i.test(data.sku)) {
-    errors.push({ field: 'sku', message: 'SKU can only contain letters, numbers, hyphens, and underscores' });
   }
 
   // Category validation

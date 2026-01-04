@@ -206,7 +206,7 @@ export function DataTable<T extends { id?: string; reference_id?: string }>({
                     variant={currentPage === page ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => onPageChange(page)}
-                    className="min-w-[36px]"
+                    className="min-w-9"
                   >
                     {page}
                   </Button>
