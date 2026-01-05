@@ -34,7 +34,7 @@ export function Navbar({ onLoginClick }: NavbarProps) {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/admin" className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg bg-linear-[#3B5BDB] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <LayoutDashboard className="w-5 h-5 text-primary-foreground" />
             </div>
             <span className="text-xl font-semibold text-[#0F172A]">AdminPanel</span>
@@ -58,7 +58,7 @@ export function Navbar({ onLoginClick }: NavbarProps) {
             {isAuthenticated ? (
               <>
                 <Link href="/admin/dashboard">
-                  <Button variant="ghost" className='hover:bg-[#3B5BDB]/10 cursor-pointer hover:text-[#3B5BDB]'>Dashboard</Button>
+                  <Button variant="ghost" className='hover:bg-primary/10 cursor-pointer hover:text-primary'>Dashboard</Button>
                 </Link>
                 <Button  variant="destructive" className='text-white cursor-pointer hover:bg-destructive/70 hover:text-black' onClick={handleLogout}>
                   Logout
@@ -66,7 +66,7 @@ export function Navbar({ onLoginClick }: NavbarProps) {
               </>
             ) : (
               <>
-                <Button variant="hero" onClick={onLoginClick} className='cursor-pointer'>
+                <Button variant="default" onClick={onLoginClick} className='cursor-pointer'>
                   Login
                 </Button>
              
@@ -115,7 +115,7 @@ export function Navbar({ onLoginClick }: NavbarProps) {
               <div className="flex flex-col space-y-2 pt-4 border-t border-border">
                 {isAuthenticated ? (
                   <>
-                    <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Link href="/admin/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
                       <Button variant="ghost" className="w-full justify-start">
                         Dashboard
                       </Button>

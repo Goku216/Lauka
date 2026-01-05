@@ -82,7 +82,7 @@ export function AuthModals({
                 type="email"
                 placeholder="you@example.com"
                 {...register('email')}
-                className="focus-visible:border-[#3B5BDB] focus-visible:ring-[#3B5BDB] focus-visible:ring-[1px]"
+                
               />
               {errors.email && (
                 <p className="text-sm text-red-500">{errors.email.message}</p>
@@ -95,13 +95,13 @@ export function AuthModals({
                 type="password"
                 placeholder="••••••••"
                 {...register('password')}
-                className="focus-visible:border-[#3B5BDB] focus-visible:ring-[#3B5BDB] focus-visible:ring-[1px]"
+                
               />
               {errors.password && (
                 <p className="text-sm text-red-500">{errors.password.message}</p>
               )}
             </div>
-            <Button variant="hero" type="submit" className="w-full cursor-pointer" disabled={isLoading}>
+            <Button variant="default" type="submit" className="w-full cursor-pointer" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Sign in
             </Button>

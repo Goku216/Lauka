@@ -46,7 +46,7 @@ export function AdminSidebar({ isCollapsed, onToggle }: AdminSidebarProps) {
         <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
           {!isCollapsed && (
             <Link href="/admin" className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
                 <LayoutDashboard className="w-5 h-5 text-primary-foreground" />
               </div>
               <span className="text-lg font-semibold text-sidebar-foreground">Admin</span>

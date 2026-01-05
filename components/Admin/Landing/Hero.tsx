@@ -8,18 +8,18 @@ interface HeroProps {
 
 export function Hero({ onGetStarted }: HeroProps) {
   return (
-    <section className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center pt-12 overflow-hidden">
       {/* Background gradient */}
       <div className="absolute inset-0 gradient-hero2" />
       
       {/* Decorative elements */}
-      <div className="absolute top-1/4 left-10 w-72 h-72 bg-[#3B5BDB]/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-[#3B5BDB]/10 rounded-full blur-3xl" />
+      <div className="absolute top-1/4 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#3B5BDB]/10 text-[#3B5BDB] text-sm font-medium mb-8 animate-fade-in">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8 animate-fade-in">
             <Zap className="w-4 h-4" />
             <span>Powerful Admin Dashboard</span>
           </div>
@@ -28,7 +28,7 @@ export function Hero({ onGetStarted }: HeroProps) {
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#0F172A] mb-6 animate-slide-up">
             Manage Everything
             <br />
-            <span className="bg-linear-to-r from-[#3B5BDB] to-purple-500 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-primary to-primary/50 bg-clip-text text-transparent">
               In One Place
             </span>
           </h1>
@@ -41,7 +41,7 @@ export function Hero({ onGetStarted }: HeroProps) {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-            <Button variant="hero" size="xl" onClick={onGetStarted} className='cursor-pointer'>
+            <Button variant="default" size="xl" onClick={onGetStarted} className='cursor-pointer'>
               Get Started 
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
@@ -51,7 +51,7 @@ export function Hero({ onGetStarted }: HeroProps) {
           {/* Feature highlights */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-20 animate-slide-up" style={{ animationDelay: '0.3s' }}>
             <div className="flex flex-col items-center p-6 rounded-xl bg-card border border-border shadow-sm">
-              <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center mb-4">
                 <BarChart3 className="w-6 h-6 text-primary-foreground" />
               </div>
               <h3 className="font-semibold text-foreground mb-2">Real-time Analytics</h3>
@@ -61,7 +61,7 @@ export function Hero({ onGetStarted }: HeroProps) {
             </div>
 
             <div className="flex flex-col items-center p-6 rounded-xl bg-card border border-border shadow-sm">
-              <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center mb-4">
                 <Shield className="w-6 h-6 text-primary-foreground" />
               </div>
               <h3 className="font-semibold text-foreground mb-2">Secure Access</h3>
@@ -71,7 +71,7 @@ export function Hero({ onGetStarted }: HeroProps) {
             </div>
 
             <div className="flex flex-col items-center p-6 rounded-xl bg-card border border-border shadow-sm">
-              <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center mb-4">
                 <Zap className="w-6 h-6 text-primary-foreground" />
               </div>
               <h3 className="font-semibold text-foreground mb-2">Lightning Fast</h3>
