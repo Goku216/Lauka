@@ -49,6 +49,8 @@ import { useRouter } from "next/navigation";
 import { getOrders, OrderResponse } from "@/service/OrderApi";
 import { ca } from "zod/v4/locales";
 import { toast } from "sonner";
+import { getProfile } from "@/service/api";
+import { Profile } from "@/types";
 
 // Mock user data
 const mockUser = {
@@ -58,94 +60,6 @@ const mockUser = {
   avatar: "",
   memberSince: "January 2024",
 };
-
-// Mock orders with detailed items
-export const mockOrders = [
-  {
-    id: "ORD-2024-001",
-    date: "Dec 28, 2024",
-    status: "delivered",
-    total: 156.99,
-    items: [
-      {
-        name: "Organic Tomatoes",
-        quantity: 2,
-        price: 24.99,
-        image: "/placeholder.svg",
-      },
-      {
-        name: "Fresh Lettuce",
-        quantity: 1,
-        price: 12.0,
-        image: "/placeholder.svg",
-      },
-      {
-        name: "Carrots (1kg)",
-        quantity: 3,
-        price: 45.0,
-        image: "/placeholder.svg",
-      },
-      {
-        name: "Organic Eggs",
-        quantity: 2,
-        price: 75.0,
-        image: "/placeholder.svg",
-      },
-    ],
-    deliveryAddress: "123 Fresh Street, Apt 4B, San Francisco, CA 94102",
-    paymentMethod: "Cash on Delivery",
-  },
-  {
-    id: "ORD-2024-002",
-    date: "Dec 20, 2024",
-    status: "shipped",
-    total: 89.5,
-    items: [
-      {
-        name: "Fresh Spinach",
-        quantity: 2,
-        price: 44.5,
-        image: "/placeholder.svg",
-      },
-      {
-        name: "Organic Bananas",
-        quantity: 1,
-        price: 45.0,
-        image: "/placeholder.svg",
-      },
-    ],
-    deliveryAddress: "456 Market Avenue, Suite 100, San Francisco, CA 94103",
-    paymentMethod: "Cash on Delivery",
-  },
-  {
-    id: "ORD-2024-003",
-    date: "Dec 15, 2024",
-    status: "processing",
-    total: 234.0,
-    items: [
-      {
-        name: "Mixed Vegetables",
-        quantity: 4,
-        price: 120.0,
-        image: "/placeholder.svg",
-      },
-      {
-        name: "Organic Potatoes",
-        quantity: 2,
-        price: 60.0,
-        image: "/placeholder.svg",
-      },
-      {
-        name: "Fresh Herbs Bundle",
-        quantity: 3,
-        price: 54.0,
-        image: "/placeholder.svg",
-      },
-    ],
-    deliveryAddress: "123 Fresh Street, Apt 4B, San Francisco, CA 94102",
-    paymentMethod: "Cash on Delivery",
-  },
-];
 
 // Mock addresses
 export const mockAddresses = [
@@ -238,14 +152,14 @@ export default function UserProfile() {
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [orders, setOrders] = useState<OrderResponse[]>([]);
+  const [profile, setProfile] = useState<Profile>();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
 
-  // Form states for edit profile
   const [editForm, setEditForm] = useState({
-    name: mockUser.name,
-    email: mockUser.email,
-    phone: mockUser.phone,
+    name: "",
+    email: "",
+    phone: "",
   });
 
   useEffect(() => {
@@ -256,6 +170,7 @@ export default function UserProfile() {
 
   useEffect(() => {
     fetchOrders();
+    fetchProfile();
   }, []);
 
   const fetchOrders = async () => {
@@ -268,6 +183,26 @@ export default function UserProfile() {
       toast.error(error.message);
     }
   };
+
+  const fetchProfile = async () => {
+    try {
+      const response = await getProfile();
+      setProfile(response);
+    } catch (error: any) {
+      console.log(error);
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (profile) {
+      setEditForm({
+        name: profile.username ?? "",
+        email: profile.email ?? "",
+        phone: profile.phone_number ?? "",
+      });
+    }
+  }, [profile]);
 
   useEffect(() => {
     if (showOrderModal || showEditProfileModal) {
@@ -302,6 +237,13 @@ export default function UserProfile() {
     { value: "wishlist", label: "Wishlist", icon: Heart },
     { value: "settings", label: "Settings", icon: Settings },
   ];
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -396,7 +338,7 @@ export default function UserProfile() {
               <Avatar className="w-20 h-20 sm:w-24 sm:h-24 border-4 border-primary/20">
                 <AvatarImage src={mockUser.avatar} alt={mockUser.name} />
                 <AvatarFallback className="bg-primary text-primary-foreground text-xl sm:text-2xl font-bold">
-                  {mockUser.name
+                  {profile?.username
                     .split(" ")
                     .map((n) => n[0])
                     .join("")}
@@ -404,23 +346,21 @@ export default function UserProfile() {
               </Avatar>
               <div className="flex-1 text-center sm:text-left">
                 <h1 className="text-xl sm:text-2xl font-bold text-foreground font-nunito">
-                  {mockUser.name}
+                  {profile?.username}
                 </h1>
                 <p className="text-sm sm:text-base text-muted-foreground">
-                  {mockUser.email}
+                  {profile?.email}
                 </p>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                  Member since {mockUser.memberSince}
+                  Member since {formatDate(profile?.date_joined as string)}
                 </p>
                 <div className="flex flex-wrap gap-2 mt-3 sm:mt-4 justify-center sm:justify-start">
-                  <Badge className="bg-primary/10 text-primary hover:bg-primary/20">
-                    Premium Member
-                  </Badge>
+                  
                   <Badge
                     variant="outline"
                     className="border-primary text-primary"
                   >
-                    🥕 15 Orders
+                    {orders.length} Orders
                   </Badge>
                 </div>
               </div>
@@ -583,8 +523,8 @@ export default function UserProfile() {
                             Empty Order
                           </h1>
                           <p className="text-muted-foreground mb-8">
-                            Looks like you haven't ordered any products yet. Start
-                            ordering to see order status
+                            Looks like you haven't ordered any products yet.
+                            Start ordering to see order status
                           </p>
                           <Link href="/products">
                             <Button className="btn-primary">
@@ -792,22 +732,7 @@ export default function UserProfile() {
                   <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground shrink-0" />
                 </div>
 
-                <div className="flex items-center justify-between p-3 sm:p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                      <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-sm sm:text-base text-foreground">
-                        Payment Methods
-                      </p>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        Manage your payment options
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground shrink-0" />
-                </div>
+             
 
                 <div className="flex items-center justify-between p-3 sm:p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer">
                   <div className="flex items-center gap-3">
@@ -1013,15 +938,12 @@ export default function UserProfile() {
                 <Avatar className="w-20 h-20 sm:w-24 sm:h-24 border-4 border-primary/20">
                   <AvatarImage src={mockUser.avatar} alt={mockUser.name} />
                   <AvatarFallback className="bg-primary text-primary-foreground text-xl sm:text-2xl font-bold">
-                    {mockUser.name
+                    {profile?.username
                       .split(" ")
                       .map((n) => n[0])
                       .join("")}
                   </AvatarFallback>
                 </Avatar>
-                <Button variant="outline" size="sm">
-                  Change Photo
-                </Button>
               </div>
 
               {/* Name */}

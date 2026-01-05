@@ -166,6 +166,19 @@ export interface User {
 export type UsersResponse = PaginatedResponse<User>;
 
 
+export interface Profile {
+  reference_id: string;
+  email: string;
+  username: string;
+  phone_number: string;
+  bio: string;
+  is_active: boolean;
+  is_verified: boolean;
+  date_joined: string;
+
+}
+
+
 
 
 

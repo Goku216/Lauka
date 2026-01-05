@@ -1,9 +1,12 @@
+import VerifyEmail from "@/components/pages/VerifyEmail"
+import { Suspense } from "react"
 
-
-const VerifyEmail = () => {
+const page = () => {
   return (
-    <div>page</div>
+    <Suspense fallback={<div>Loading ...</div>}>
+    <VerifyEmail />
+    </Suspense>
   )
 }
 
-export default VerifyEmail
+export default page

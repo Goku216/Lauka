@@ -54,10 +54,6 @@ import {
   Zap,
 } from "lucide-react";
 
-/**
- * Icon name -> Lucide icon component
- * Store ONLY the key (string) in DB
- */
 export const ICON_MAP = {
   // General
   ShoppingBag,

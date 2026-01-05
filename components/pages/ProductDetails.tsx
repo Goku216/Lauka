@@ -8,13 +8,14 @@ import { ShoppingCart, Minus, Plus, Star, Truck, Shield, MapPin, ArrowLeft, Load
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Product } from '@/types';
+import { toast } from 'sonner';
 
 
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_API;
 
 export default function ProductDetail({ id }: { id: string | undefined }) {
-  const { addItem } = useCart();
+  const { addItem , items } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -22,6 +23,7 @@ export default function ProductDetail({ id }: { id: string | undefined }) {
   const [selectedImage, setSelectedImage] = useState<string>('');
   const [showFullImage, setShowFullImage] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [cartQuantity, setCartQuantity] = useState(0)
 
   // Fetch product details
   useEffect(() => {
@@ -43,7 +45,7 @@ export default function ProductDetail({ id }: { id: string | undefined }) {
         const data: Product = await response.json();
         setProduct(data);
         setSelectedImage(data.image);
-
+        console.log("Quantity", data.stock)
         // Fetch related products by category
         if (data.category) {
           fetchRelatedProducts(data.category, data.reference_id);
@@ -78,13 +80,32 @@ export default function ProductDetail({ id }: { id: string | undefined }) {
     }
   };
 
-  const handleAddToCart = () => {
-    if (!product) return;
-    
-    for (let i = 0; i < quantity; i++) {
-      addItem(product);
-    }
-  };
+
+ const handleAddToCart = () => {
+  if (!product) return;
+
+  const existingCartItem = items.find(
+    (item) => item.product.reference_id === product.reference_id
+  );
+
+  const CartQuantity = existingCartItem?.quantity || 0;
+  
+  const remainingStock = product.stock - CartQuantity;
+
+  setCartQuantity(CartQuantity)
+
+  if (remainingStock <= 0) {
+    toast.error("No stock Available!");
+    return;
+  }
+
+  const quantityToAdd = Math.min(quantity, remainingStock);
+
+  for (let i = 0; i < quantityToAdd; i++) {
+    addItem(product);
+  }
+};
+
 
   // Get all images (main image + additional images)
   const getAllImages = (): string[] => {
@@ -295,7 +316,7 @@ export default function ProductDetail({ id }: { id: string | undefined }) {
               <Button
                 className="btn-primary flex-1 text-lg"
                 onClick={handleAddToCart}
-                disabled={!product.in_stock}
+                disabled={!product.in_stock || product.stock <= cartQuantity}
               >
                 <ShoppingCart className="mr-2 h-5 w-5" />
                 Add to Cart

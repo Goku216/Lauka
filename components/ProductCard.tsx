@@ -6,13 +6,34 @@ import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
 import Link from 'next/link';
 import { ProductResponse } from '@/service/productApi';
+import { toast } from 'sonner';
+import { useState } from 'react';
 
 interface ProductCardProps {
   product: ProductResponse;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const { addItem } = useCart();
+  const { addItem, items } = useCart();
+    const [cartQuantity, setCartQuantity] = useState(0)
+
+  const handleAddToCart = () => {
+  const existingCartItem = items.find(
+    (item) => item.product.reference_id === product.reference_id
+  );
+
+  const CartQuantity = existingCartItem?.quantity || 0;
+  setCartQuantity(CartQuantity)
+
+
+  if (CartQuantity >= product.stock) {
+    toast.error('No more stock available');
+    return;
+  }
+
+  addItem(product);
+};
+
 
   return (
     <div className="card-product group overflow-hidden">
@@ -44,9 +65,9 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Quick Add */}
         <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
           <Button
-            onClick={() => addItem(product)}
+            onClick={handleAddToCart}
             className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-full"
-            disabled={!product.in_stock}
+            disabled={!product.in_stock ||product.stock <= cartQuantity }
           >
             <ShoppingCart className="h-4 w-4 mr-2" />
             Add to Cart

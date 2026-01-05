@@ -20,7 +20,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsAuthenticated(false);
       }
 
-    } catch {
+    } catch(error: any) {
+   
       setIsAuthenticated(false);
    
     }

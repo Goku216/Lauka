@@ -1,4 +1,4 @@
-import { UsersResponse } from "@/types";
+import { Profile, UsersResponse } from "@/types";
 import apiClient from "./ApiConfig/apiClient";
 
 export interface LoginPayload {
@@ -46,7 +46,12 @@ export const checkAuth = async (): Promise<any> => {
         const response = await apiClient.get<any>("/auth/me");
         return response.isAuthenticated;
     } catch (error: any) {
-        throw new Error(error.response?.data?.message || "Authentication check failed");
+        const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      "Failed to fetch orders";
+
+    throw new Error(message);
     }   
 };
 
@@ -72,6 +77,21 @@ export const resendVerification = async (email: string): Promise<any> => {
 
     throw new Error(message)
     }
+}
+
+export const getProfile = async (): Promise<Profile> => {
+  try {
+    const response = await apiClient.get<any>("/auth/profile")
+    return response
+  }
+  catch(error: any) {
+        const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      "Failed Sending Verification"
+
+    throw new Error(message)
+  }
 }
 
 

@@ -33,7 +33,6 @@ export default function Categories() {
   const [loading, setLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
-  const [totalItems, setTotalItems] = useState(0);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -48,13 +47,12 @@ export default function Categories() {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const {categories, total} = await getCategories({ page: currentPage, limit: 10 });
+      const {categories} = await getCategories();
       
       setCategories(categories);
-      setTotalItems(total)
       
     } catch (error) {
-      setTotalItems(0)
+    
       toast.error("Failed to fetch categories");
     } finally {
       setLoading(false);
@@ -172,10 +170,6 @@ export default function Categories() {
               currentPage={currentPage}
               onPageChange={setCurrentPage}
               isLoading={loading}
-              pageSize={10}
-              totalItems={totalItems}
-              serverPagination={true}
-
             />
           </CardContent>
         </Card>

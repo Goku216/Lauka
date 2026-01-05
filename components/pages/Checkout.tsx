@@ -40,7 +40,7 @@ export default function Checkout() {
     if (isAuthenticated === false) {
       router.push('/');
     }
-    console.log(items)
+    console.log("Check auth", isAuthenticated)
   }, [isAuthenticated, router]);
 
 

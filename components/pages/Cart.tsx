@@ -9,6 +9,7 @@ import { LoginForm } from '../login-form';
 import { useState, useEffect } from 'react';
 import { SignupForm } from '../signup-form';
 import { checkAuth } from '@/service/api';
+import { toast } from 'sonner';
 
 export default function Cart() {
   const { items, totalItems, totalPrice, updateQuantity, removeItem } = useCart();
@@ -31,6 +32,7 @@ export default function Cart() {
   }, [modal]);
 
   const handleCheckout = async () => {
+    try {
     const isAuthenticated = await checkAuth();
     console.log('User authenticated:', isAuthenticated);
     if (isAuthenticated) {
@@ -39,7 +41,25 @@ export default function Cart() {
     } else {
       setModal('login');
     }
+  } catch(error:any) {
+    setModal("login")
+  }
   };
+
+  const handleIncrease = (referenceId: string, currentQty: number, stock: number) => {
+  if (currentQty >= stock) {
+    toast.error('No more stock available');
+    return;
+  }
+  updateQuantity(referenceId, currentQty + 1);
+};
+
+const handleDecrease = (referenceId: string, currentQty: number) => {
+  updateQuantity(referenceId, currentQty - 1);
+};
+
+
+
 
   // Now check for empty cart after all hooks are called
   if (items.length === 0) {
@@ -71,12 +91,16 @@ export default function Cart() {
       <div className="container-custom py-8">
         {/* Breadcrumb */}
         <nav className="text-sm text-muted-foreground mb-6">
-          <Link href="/" className="hover:text-primary">Home</Link>
-          {' / '}
+          <Link href="/" className="hover:text-primary">
+            Home
+          </Link>
+          {" / "}
           <span className="text-foreground">Cart</span>
         </nav>
 
-        <h1 className="text-2xl font-bold mb-8">Shopping Cart ({totalItems} items)</h1>
+        <h1 className="text-2xl font-bold mb-8">
+          Shopping Cart ({totalItems} items)
+        </h1>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Cart Items */}
@@ -87,7 +111,10 @@ export default function Cart() {
                 className="bg-card p-4 sm:p-6 rounded-2xl shadow-card flex flex-col sm:flex-row gap-4"
               >
                 {/* Image */}
-                <Link href={`/product/${item.product.reference_id}`} className="shrink-0">
+                <Link
+                  href={`/product/${item.product.reference_id}`}
+                  className="shrink-0"
+                >
                   <img
                     src={item.product.image}
                     alt={item.product.name}
@@ -102,9 +129,13 @@ export default function Cart() {
                       {item.product.name}
                     </h3>
                   </Link>
-                  <p className="text-sm text-muted-foreground">{item.product.unit}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {item.product.unit}
+                  </p>
                   <div className="flex items-center gap-2 mt-2">
-                    <span className="font-bold text-primary">रू {item.product.price}</span>
+                    <span className="font-bold text-primary">
+                      रू {item.product.price}
+                    </span>
                     {item.product.price && (
                       <span className="text-sm text-muted-foreground line-through">
                         रू {item.product.price}
@@ -120,22 +151,38 @@ export default function Cart() {
                       variant="outline"
                       size="icon"
                       className="h-8 w-8"
-                      onClick={() => updateQuantity(item.product.reference_id, item.quantity - 1)}
+                      onClick={() =>
+                        handleDecrease(item.product.reference_id, item.quantity)
+                      }
+                      disabled={item.quantity <= 1}
                     >
                       <Minus className="h-3 w-3" />
                     </Button>
-                    <span className="w-8 text-center font-medium">{item.quantity}</span>
+
+                    <span className="w-8 text-center font-medium">
+                      {item.quantity}
+                    </span>
+
                     <Button
                       variant="outline"
                       size="icon"
                       className="h-8 w-8"
-                      onClick={() => updateQuantity(item.product.reference_id, item.quantity + 1)}
+                      onClick={() =>
+                        handleIncrease(
+                          item.product.reference_id,
+                          item.quantity,
+                          item.product.stock
+                        )
+                      }
+                      disabled={item.quantity >= item.product.stock}
                     >
                       <Plus className="h-3 w-3" />
                     </Button>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className="font-bold text-lg">रू {Number(item.product.price) * item.quantity}</span>
+                    <span className="font-bold text-lg">
+                      रू {Number(item.product.price) * item.quantity}
+                    </span>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -154,7 +201,7 @@ export default function Cart() {
           <div className="lg:col-span-1">
             <div className="bg-card p-6 rounded-2xl shadow-card sticky top-28">
               <h2 className="font-bold text-lg mb-4">Order Summary</h2>
-              
+
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-muted-foreground">
                   <span>Subtotal ({totalItems} items)</span>
@@ -175,18 +222,19 @@ export default function Cart() {
                 <div className="flex items-start gap-2">
                   <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                   <p className="text-sm text-accent-foreground">
-                    Delivery available only within <strong>Lumbini Province</strong>. 
-                    Cash on Delivery only.
+                    Delivery available only within{" "}
+                    <strong>Lumbini Province</strong>. Cash on Delivery only.
                   </p>
                 </div>
               </div>
 
-              
-                <Button onClick={handleCheckout} className="w-full btn-primary text-lg">
-                  Proceed to Checkout
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-            
+              <Button
+                onClick={handleCheckout}
+                className="w-full btn-primary text-lg"
+              >
+                Proceed to Checkout
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
 
               <Link href="/products">
                 <Button variant="ghost" className="w-full mt-3">
@@ -198,11 +246,11 @@ export default function Cart() {
         </div>
       </div>
 
-      {modal !== 'none' && (
+      {modal !== "none" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setModal('none')}
+            onClick={() => setModal("none")}
           />
 
           <div
@@ -211,16 +259,16 @@ export default function Cart() {
             className="relative w-full max-w-md mx-4"
           >
             <div className="p-2">
-              {modal === 'login' ? (
-                <LoginForm onSwitch={() => setModal('signup')} />
+              {modal === "login" ? (
+                <LoginForm onSwitch={() => setModal("signup")} />
               ) : (
-                <SignupForm onSwitch={() => setModal('login')} />
+                <SignupForm onSwitch={() => setModal("login")} />
               )}
             </div>
 
             <button
               aria-label="Close modal"
-              onClick={() => setModal('none')}
+              onClick={() => setModal("none")}
               className="absolute -top-2 -right-2 p-2 rounded-full bg-card shadow-md hover:opacity-90"
             >
               <X className="h-4 w-4" />
