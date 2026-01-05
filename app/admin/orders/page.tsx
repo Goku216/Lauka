@@ -1,257 +1,181 @@
-"use client";
-import { mockOrders } from "@/app/profile/page";
-import { AdminLayout } from "@/components/Admin/AdminLayout";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  ArrowRight,
-  CheckCircle,
-  ChevronRight,
-  Clock,
-  CreditCard,
-  MapPin,
-  Package,
-  Truck,
-  X,
-} from "lucide-react";
-import React, { useState } from "react";
+"use client"
+import  { useEffect, useState } from 'react';
+import { Eye, Loader2, Package } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { DataTable } from '@/components/Admin/DataTable';
+import { OrderDetailsModal } from '@/components/Admin/OrderDetailsModal';
+import { Order, OrderStatus } from '@/types';
+import { AdminLayout } from '@/components/Admin/AdminLayout';
+import { changeOrderStatus, getAllOrders } from '@/service/OrderApi';
+import { toast } from 'sonner';
 
-const getStatusConfig = (status: string) => {
-  switch (status) {
-    case "delivered":
-      return {
-        icon: CheckCircle,
-        label: "Delivered",
-        className: "bg-green-100 text-green-700",
-      };
-    case "shipped":
-      return {
-        icon: Truck,
-        label: "Shipped",
-        className: "bg-blue-100 text-blue-700",
-      };
-    case "processing":
-      return {
-        icon: Clock,
-        label: "Processing",
-        className: "bg-yellow-100 text-yellow-700",
-      };
-    default:
-      return {
-        icon: Package,
-        label: status,
-        className: "bg-muted text-muted-foreground",
-      };
-  }
+
+export const statusColors: Record<OrderStatus, string> = {
+  CONFIRMED: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+  PENDING: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+  SHIPPED: 'bg-blue-100 text-blue-700 dark:bg-blue-100 dark:text-blue-400',
+  DELIVERED: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  CANCELLED: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
 };
 
-const Orders = () => {
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
-  const [showOrderModal, setShowOrderModal] = useState(false);
+export default function Orders() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [totalItems, setTotalItems] = useState(0);
 
-  const handleViewOrderDetails = (order: any) => {
+  const handleViewDetails = (order: Order) => {
     setSelectedOrder(order);
-    setShowOrderModal(true);
+    setIsModalOpen(true);
   };
+
+  useEffect(() => {
+    fetchAllOrders()
+  }, [currentPage])
+
+  const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
+    try {
+        const response = await changeOrderStatus(orderId, newStatus)
+        toast.success(response.message)
+        setOrders(prev =>
+      prev.map(order =>
+        order.order_id === orderId ? { ...order, status: newStatus } : order
+      )
+    );
+    if (selectedOrder?.order_id === orderId) {
+      setSelectedOrder(prev => prev ? { ...prev, status: newStatus } : null);
+    }
+      } catch(error: any) {
+        console.log(error)
+        toast.error(error.message)
+      }
+ 
+  };
+
+ 
+
+  const fetchAllOrders = async () => {
+    try {
+      setLoading(true)
+      const response = await getAllOrders({
+        page: currentPage,
+        limit: 10,
+      })
+      setOrders(response.results || [])
+      setTotalItems(response.count || 0);
+    } catch(error: any) {
+      toast.error(error.message)
+       setOrders([])
+      setTotalItems(0);
+    }
+    finally {
+      setLoading(false)
+    }
+  } 
+
+  const columns = [
+    {
+      key: 'order_code',
+      title: 'Order ID',
+      render: (item: Order) => (
+        <div className="flex items-center gap-2">
+          <Package className="w-4 h-4 text-muted-foreground" />
+          <span className="font-medium text-sm">{item.order_code}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'full_name',
+      title: 'Customer',
+      render: (item: Order ) => (
+        <span className="text-sm">{item.full_name}</span>
+      ),
+    },
+    {
+      key: 'items',
+      title: 'Items',
+      render: (item: Order) => (
+        <span className="text-sm text-muted-foreground">
+          {item.items.reduce((sum, i) => sum + i.quantity, 0)} item(s)
+        </span>
+      ),
+    },
+    {
+      key: 'total_price',
+      title: 'Total',
+      render: (item: Order ) => (
+        <span className="font-semibold text-sm">Rs. {item.total_price}</span>
+      ),
+    },
+    {
+      key: 'status',
+      title: 'Status',
+      render: (item: Order ) => (
+        <Badge className={`${statusColors[item.status]} border-0`}>
+          {item.status}
+        </Badge>
+      ),
+    },
+    {
+      key: 'actions',
+      title: 'Actions',
+      render: (item: Order) => (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleViewDetails(item)}
+          className="gap-1"
+        >
+          <Eye className="w-4 h-4" />
+          View Details
+        </Button>
+      ),
+    },
+  ];
+
   return (
     <AdminLayout>
-      <div className="space-y-6 animate-fade-in">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-foreground">Orders</h2>
-            <p className="text-muted-foreground">Manage your orders history</p>
-          </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Orders</h1>
+          <p className="text-muted-foreground">Manage and track customer orders</p>
         </div>
-        <Card className="shadow-card">
-          <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg font-semibold ">
-              Order History
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <div className="space-y-3 sm:space-y-4">
-              {mockOrders.map((order) => {
-                const statusConfig = getStatusConfig(order.status);
-                const StatusIcon = statusConfig.icon;
-                return (
-                  <div
-                    key={order.id}
-                    className="flex items-center justify-between rounded-xl border border-border hover:border-primary/50 transition-colors"
-                  >
-                    <div className="flex flex-col gap-3 p-3 sm:p-4 ">
-                      <div className="flex items-start gap-3 sm:gap-4">
-                        <div className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-lg bg-muted flex items-center justify-center overflow-hidden shrink-0">
-                          <Package className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
-                            <p className="font-semibold text-sm sm:text-base text-foreground">
-                              {order.id}
-                            </p>
-                            <Badge
-                              className={`${statusConfig.className} text-xs w-fit`}
-                            >
-                              <StatusIcon className="w-3 h-3 mr-1" />
-                              {statusConfig.label}
-                            </Badge>
-                          </div>
-                          <p className="text-xs sm:text-sm text-muted-foreground">
-                            {order.items.length} items • Ordered on {order.date}
-                          </p>
-                          <p className="text-base sm:text-xl font-bold text-foreground mt-2">
-                            रू{order.total.toFixed(2)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="mr-4 ">
-                      <p
-                        className="text-primary/90  hover:underline hover:text-primary/80 flex gap-1 items-center cursor-pointer"
-                        onClick={() => handleViewOrderDetails(order)}
-                      >
-                        View Details <ArrowRight className="w-4 h-4" />
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-
-        {showOrderModal && selectedOrder && (
-          <div className="fixed inset-0 my-20  flex items-center justify-center pt-8">
-           
-            <div className="relative bg-card rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
-              {/* Modal Header */}
-              <div className="sticky top-0 bg-card border-b border-border p-4 sm:p-6 flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg sm:text-xl font-bold text-foreground">
-                    Order Details
-                  </h2>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
-                    {selectedOrder.id}
-                  </p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowOrderModal(false)}
-                  className="shrink-0"
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
-
-              {/* Modal Content */}
-              <div className="overflow-y-auto max-h-[calc(90vh-80px)] p-4 sm:p-6">
-                {/* Status */}
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <p className="text-xs sm:text-sm text-muted-foreground mb-1">
-                      Order Status
-                    </p>
-                    <Badge
-                      className={`${
-                        getStatusConfig(selectedOrder.status).className
-                      } text-sm`}
-                    >
-                      {React.createElement(
-                        getStatusConfig(selectedOrder.status).icon,
-                        { className: "w-4 h-4 mr-1" }
-                      )}
-                      {getStatusConfig(selectedOrder.status).label}
-                    </Badge>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs sm:text-sm text-muted-foreground mb-1">
-                      Order Date
-                    </p>
-                    <p className="font-semibold text-sm sm:text-base">
-                      {selectedOrder.date}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Items */}
-                <div className="mb-6">
-                  <h3 className="font-semibold text-sm sm:text-base mb-3">
-                    Order Items
-                  </h3>
-                  <div className="space-y-3">
-                    {selectedOrder.items.map((item: any, index: number) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-3 p-3 rounded-lg bg-muted/50"
-                      >
-                        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-card flex items-center justify-center shrink-0">
-                          <Package className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm sm:text-base text-foreground">
-                            {item.name}
-                          </p>
-                          <p className="text-xs sm:text-sm text-muted-foreground">
-                            Qty: {item.quantity}
-                          </p>
-                        </div>
-                        <p className="font-bold text-sm sm:text-base text-foreground">
-                          रू{item.price.toFixed(2)}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Delivery Info */}
-                <div className="mb-6">
-                  <h3 className="font-semibold text-sm sm:text-base mb-3">
-                    Delivery Address
-                  </h3>
-                  <div className="p-3 sm:p-4 rounded-lg bg-muted/50">
-                    <div className="flex items-start gap-2">
-                      <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-primary mt-0.5 shrink-0" />
-                      <p className="text-xs sm:text-sm text-foreground">
-                        {selectedOrder.deliveryAddress}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Payment */}
-                <div className="mb-6">
-                  <h3 className="font-semibold text-sm sm:text-base mb-3">
-                    Payment Method
-                  </h3>
-                  <div className="p-3 sm:p-4 rounded-lg bg-muted/50">
-                    <div className="flex items-center gap-2">
-                      <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                      <p className="text-xs sm:text-sm text-foreground">
-                        {selectedOrder.paymentMethod}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Total */}
-                <div className="border-t border-border pt-4">
-                  <div className="flex items-center justify-between">
-                    <p className="text-base sm:text-lg font-semibold text-foreground">
-                      Total Amount
-                    </p>
-                    <p className="text-xl sm:text-2xl font-bold text-primary">
-                      रू{selectedOrder.total.toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
+      {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : orders.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Package className="w-12 h-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No orders found</h3> 
+              </div>
+            ) : (
+
+      <DataTable
+        data={orders}
+        columns={columns}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+        totalItems={totalItems}
+        pageSize={10}
+        isLoading={loading}
+        serverPagination={true}
+        
+      />
+        )}
+
+      <OrderDetailsModal
+        order={selectedOrder}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onStatusChange={handleStatusChange}
+      />
+    </div>
     </AdminLayout>
   );
-};
-
-export default Orders;
+}

@@ -1,3 +1,4 @@
+import { UsersResponse } from "@/types";
 import apiClient from "./ApiConfig/apiClient";
 
 export interface LoginPayload {
@@ -72,4 +73,57 @@ export const resendVerification = async (email: string): Promise<any> => {
     throw new Error(message)
     }
 }
+
+
+export const getAllUsers = async (params?: {
+  page?: number;
+  limit?: number;
+}): Promise<UsersResponse> => {
+  const queryParams = new URLSearchParams();
+  if (params?.page) queryParams.append("page", params.page.toString());
+  if (params?.limit) queryParams.append("page_size", params.limit.toString());
+
+  try {
+    const response = await apiClient.get<UsersResponse>(
+      `/admin/users?${queryParams.toString()}`
+    );
+    return response;
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      "Failed to fetch orders";
+
+    throw new Error(message);
+  }
+};
+
+
+export const banUser = async (id:string): Promise<any> => {
+  try {
+    const response = await apiClient.post(`/admin/users/${id}/ban/`)
+    return response
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      "Failed to fetch orders";
+
+    throw new Error(message);
+  }
+};
+
+export const unbanUser = async (id:string): Promise<any> => {
+  try {
+    const response = await apiClient.post(`/admin/users/${id}/unban/`)
+    return response
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      "Failed to fetch orders";
+
+    throw new Error(message);
+  }
+};
 

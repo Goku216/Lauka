@@ -81,8 +81,6 @@ export default function Products() {
         limit: 10,
       });
       setProducts(response.products || []);
-      console.log(response.products)
-      
       setTotalItems(response.total || 0);
     } catch (error) {
       console.error('Failed to fetch products:', error);
@@ -288,10 +286,10 @@ const matchedCategory = categories.find(
       title: 'Price',
       render: (product: ProductResponse) => (
         <div className="space-y-1">
-          <div className="font-semibold">${parseFloat(product.price).toFixed(2)}</div>
+          <div className="font-semibold">Rs. {parseFloat(product.price).toFixed(2)}</div>
           {product.discount_price && parseFloat(product.discount_price) > 0 && (
             <div className="text-sm text-green-600">
-              Sale: ${parseFloat(product.discount_price).toFixed(2)}
+              Sale: Rs. {parseFloat(product.discount_price).toFixed(2)}
             </div>
           )}
         </div>

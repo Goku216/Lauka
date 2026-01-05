@@ -43,6 +43,15 @@ export default function Checkout() {
     console.log(items)
   }, [isAuthenticated, router]);
 
+
+   const scrollToTop = () => {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "smooth",
+      });
+    };
+
   if (items.length === 0 && !orderPlaced) {
     return (
       <Layout>
@@ -129,6 +138,8 @@ export default function Checkout() {
       return;
     }
 
+    try {
+
     setIsSubmitting(true);
 
      
@@ -139,7 +150,6 @@ export default function Checkout() {
     
     const cartResponse = await bulkAddToCart(cartPayload)
 
-    console.log(cartResponse)
 
     const orderPayload: OrderPayload = {
       full_name: form.fullName,
@@ -152,16 +162,19 @@ export default function Checkout() {
     }
 
     const orderResponse = await createOrder(orderPayload)
-    console.log(orderResponse)
 
-    const newOrderNumber = `LO-${Date.now().toString().slice(-8)}`;
-    setOrderNumber(newOrderNumber);
+    setOrderNumber(orderResponse.data.order_code);
     clearCart();
     setOrderPlaced(true);
 
     toast.success(orderResponse.message);
-
-    setIsSubmitting(false);
+    scrollToTop();
+  
+  } catch(error: any){
+    toast.error(error.message)
+  } finally {
+      setIsSubmitting(false);
+  }
   };
 
   const updateForm = (field: keyof CheckoutForm, value: string) => {
