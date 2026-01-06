@@ -4,9 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/lib/auth-context';
 
-import { User, Lock, Bell, Palette } from 'lucide-react';
+import { User, Lock, Bell } from 'lucide-react';
 import { AdminLayout } from '@/components/Admin/AdminLayout';
 import { toast } from 'sonner';
 

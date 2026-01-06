@@ -45,12 +45,12 @@ export function Navbar({ onLoginClick }: NavbarProps) {
             <a href="#features" className="text-[#64748B] hover:text-[#0F172A] transition-colors">
               Features
             </a>
-            <a href="#pricing" className="text-[#64748B] hover:text-[#0F172A] transition-colors">
-              Pricing
-            </a>
-            <a href="#about" className="text-[#64748B] hover:text-[#0F172A] transition-colors">
+            <Link href="/" className="text-[#64748B] hover:text-[#0F172A] transition-colors">
+              Main Page
+            </Link>
+            <Link href="/about" className="text-[#64748B] hover:text-[#0F172A] transition-colors">
               About
-            </a>
+            </Link>
           </div>
 
           {/* Auth Buttons */}
