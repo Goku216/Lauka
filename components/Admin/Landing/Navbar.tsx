@@ -1,7 +1,7 @@
 "use client";
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
-import { logout } from '@/service/api';
+
 import { LayoutDashboard, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -13,13 +13,13 @@ interface NavbarProps {
 }
 
 export function Navbar({ onLoginClick }: NavbarProps) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated , logoutUser } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
 
    const handleLogout = async () => {
     try {
-      await logout();
+      await logoutUser();
       toast.success('Logged out successfully');
       router.push('/');
     } catch (error) {
@@ -120,7 +120,7 @@ export function Navbar({ onLoginClick }: NavbarProps) {
                         Dashboard
                       </Button>
                     </Link>
-                    <Button variant="outline" onClick={() => { logout(); setIsMobileMenuOpen(false); }}>
+                    <Button variant="outline" onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}>
                       Logout
                     </Button>
                   </>

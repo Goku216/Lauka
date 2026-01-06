@@ -1,43 +1,67 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { checkAuth } from "@/service/api";
+import { checkAuth, logout } from "@/service/api";
 
-const AuthContext = createContext<any>(null);
+type AuthContextType = {
+  isAuthenticated: boolean;
+  isAdmin: boolean;
+  loading: boolean;
+  logoutUser: () => Promise<void>;
+};
+
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const checkAuthentiation = async () => {
+  const checkAuthentication = async () => {
     try {
-      const res = await checkAuth();
-      
-      if(res) {
-        setIsAuthenticated(true);
-      } else {
-        setIsAuthenticated(false);
-      }
+      setLoading(true);
 
-    } catch(error: any) {
-   
+      const res = await checkAuth();
+
+      setIsAuthenticated(res.isAuthenticated === true);
+      setIsAdmin(res.role === "admin");
+    } catch (error) {
       setIsAuthenticated(false);
-   
+      setIsAdmin(false);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    checkAuthentiation();
-    const interval = setInterval(checkAuthentiation, 60000);
+    checkAuthentication();
+
+    const interval = setInterval(checkAuthentication, 60000);
     return () => clearInterval(interval);
   }, []);
 
+  const logoutUser = async () => {
+    try {
+      await logout();
+    } finally {
+      setIsAuthenticated(false);
+      setIsAdmin(false);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, isAdmin, loading, logoutUser }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) {
+    throw new Error("useAuth must be used within AuthProvider");
+  }
+  return ctx;
+};

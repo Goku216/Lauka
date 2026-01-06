@@ -29,7 +29,7 @@ function useMounted() {
 }
 
 export function AdminLayout({ children }: React.PropsWithChildren) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isAdmin } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -40,7 +40,7 @@ export function AdminLayout({ children }: React.PropsWithChildren) {
 
   /* ---------- AUTH REDIRECT ---------- */
   useEffect(() => {
-    if (isAuthenticated === false) {
+    if (!isAuthenticated || !isAdmin) {
       router.push("/");
     }
   }, [isAuthenticated, router]);

@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { toast } from 'sonner';
 
 const navItems = [
   { title: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -32,7 +33,16 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ isCollapsed, onToggle }: AdminSidebarProps) {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { logoutUser } = useAuth();
+
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser()
+    } catch(error: any){
+      toast.error(error.message)
+    }
+  }
 
   return (
     <aside
@@ -91,7 +101,7 @@ export function AdminSidebar({ isCollapsed, onToggle }: AdminSidebarProps) {
         {/* Footer */}
         <div className="border-t border-sidebar-border p-4">
           <button
-            onClick={logout}
+            onClick={handleLogout}
             className={cn(
               'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium w-full transition-colors',
               'text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground'

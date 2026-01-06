@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ShoppingCart,
   Menu,
@@ -17,7 +17,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useCart } from "@/context/CartContext";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { checkAuth, logout } from "@/service/api";
+import { useAuth } from "@/lib/auth-context";
 
 interface HeaderProps {
   setModal: (value: "none" | "login" | "signup") => void;
@@ -33,24 +33,17 @@ const navLinks = [
 
 export function Header({ setModal }: HeaderProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const {isAuthenticated , logoutUser} = useAuth();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  useEffect(() => {
-    const response = async () => {
-      const authStatus = await checkAuth();
-      setIsAuthenticated(authStatus);
-    };
-    response();
-  }, []);
+ 
 
   const { totalItems } = useCart();
   const pathname = usePathname();
 
   const handleLogout = async () => {
     try {
-      await logout();
-      window.location.reload();
+      await logoutUser()
     } catch (error) {
       console.error("Logout failed:", error);
     }

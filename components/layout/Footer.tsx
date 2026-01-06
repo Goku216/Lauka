@@ -3,8 +3,13 @@ import { Leaf, MapPin, Phone, Mail, Facebook, Instagram, Twitter } from 'lucide-
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useAuth } from '@/lib/auth-context';
+
 
 export function Footer() {
+  const {isAuthenticated, isAdmin} = useAuth()
+
+ 
   return (
     <footer className="bg-foreground text-background">
       {/* Newsletter */}
@@ -119,6 +124,19 @@ export function Footer() {
           </div>
         </div>
       </div>
+
+
+    {(isAuthenticated && isAdmin) && 
+    <Link href="/admin">
+    <div className='w-fit bg-primary ml-4 mb-2'>
+        <Button variant="default" size="lg" className='rounded'>
+          Admin Panel
+        </Button>
+      </div>
+      </Link>
+
+    }
+      
 
       {/* Bottom Bar */}
       <div className="border-t border-background/10">

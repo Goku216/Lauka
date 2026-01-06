@@ -44,7 +44,7 @@ export const registerUser = async (data: RegisterPayload): Promise<any> => {
 export const checkAuth = async (): Promise<any> => {
     try {
         const response = await apiClient.get<any>("/auth/me");
-        return response.isAuthenticated;
+        return response;
     } catch (error: any) {
         const message =
       error?.response?.data?.message ||

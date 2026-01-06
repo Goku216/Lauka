@@ -12,7 +12,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
-import { logout } from '@/service/api';
 import { toast } from 'sonner';
 
 
@@ -20,14 +19,20 @@ interface AdminHeaderProps {
   title: string;
 }
 
+const user = {
+  name: "",
+  email: ""
+}
+
 export function AdminHeader({ title }: AdminHeaderProps) {
-  const { user } = useAuth();
+
+  const {logoutUser} = useAuth()
+
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await logoutUser()
       toast.success('Logged out successfully');
-      window.location.reload();
     } catch (error) {
       toast.error('Logout failed');
       console.error('Logout failed:', error);
