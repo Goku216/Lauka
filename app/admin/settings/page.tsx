@@ -11,11 +11,11 @@ import { AdminLayout } from '@/components/Admin/AdminLayout';
 import { toast } from 'sonner';
 
 export default function Settings() {
-  const { user } = useAuth();
+
   
   const [profileData, setProfileData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
+    name:  '',
+    email: '',
   });
 
   const [passwordData, setPasswordData] = useState({
