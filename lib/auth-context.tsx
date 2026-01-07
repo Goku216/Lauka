@@ -2,6 +2,7 @@
 
 import React, { createContext, SetStateAction, useContext, useEffect, useState } from "react";
 import { checkAuth, logout } from "@/service/api";
+import { toast } from "sonner";
 
 type AuthContextType = {
   isAuthenticated: boolean;
@@ -44,7 +45,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logoutUser = async () => {
     try {
       await logout();
-    } finally {
+    } catch(error: any) {
+      toast.error(error.message)
+    }
+     finally {
       setIsAuthenticated(false);
       setIsAdmin(false);
     }

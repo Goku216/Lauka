@@ -36,17 +36,12 @@ export function Header({ setModal }: HeaderProps) {
   const {isAuthenticated , logoutUser} = useAuth();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
- 
 
   const { totalItems } = useCart();
   const pathname = usePathname();
 
-  const handleLogout = async () => {
-    try {
-      await logoutUser()
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
+  const handleLogout = () => {
+    logoutUser()
   };
 
   const handleModalOpen = (modalType: "login" | "signup") => {
