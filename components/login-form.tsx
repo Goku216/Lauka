@@ -26,6 +26,7 @@ import { useState } from "react"
 
 import ForgotPasswordModal from "./ForgotPasswordModal"
 import VerificationPendingModal from "./VerificationPendingModal"
+import { useAuth } from "@/lib/auth-context"
 
 type LoginFormProps = React.ComponentProps<"div"> & {
   onSwitch?: () => void;
@@ -57,6 +58,7 @@ export function LoginForm({
   const [forgotPassowrd, setForgotPassword] = useState(false);
   const [isVerificationPending, setIsVerificationPending] = useState(false)
   const [verificationEmail, setVerificationEmail] = useState("")
+  const {setIsAuthenticated} = useAuth();
 
   async function onSubmit(values: LoginFormValues) {
     try {
@@ -77,8 +79,11 @@ export function LoginForm({
       // Reset form and close modal on success
       reset()
       onLoginSuccess?.()
-      window.location.reload();
+      setIsAuthenticated(true)
+      // window.location.reload();
+      
       toast.success("Logged In Successfully")
+      
     } catch (error : any) {
       console.error('Login error:', error)
       toast.error(error.message || "Something went wrong")

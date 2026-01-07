@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, SetStateAction, useContext, useEffect, useState } from "react";
 import { checkAuth, logout } from "@/service/api";
 
 type AuthContextType = {
@@ -8,6 +8,7 @@ type AuthContextType = {
   isAdmin: boolean;
   loading: boolean;
   logoutUser: () => Promise<void>;
+  setIsAuthenticated: React.Dispatch<SetStateAction<boolean>>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -51,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, isAdmin, loading, logoutUser }}
+      value={{ isAuthenticated, setIsAuthenticated, isAdmin, loading, logoutUser }}
     >
       {children}
     </AuthContext.Provider>

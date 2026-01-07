@@ -37,7 +37,7 @@ export default function Checkout() {
   const [errors, setErrors] = useState<Partial<CheckoutForm>>({});
 
   useEffect(() => {
-    if (isAuthenticated === false) {
+    if (!isAuthenticated) {
       router.push('/');
     }
     console.log("Check auth", isAuthenticated)

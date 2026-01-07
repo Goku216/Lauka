@@ -10,10 +10,14 @@ import { useState, useEffect } from 'react';
 import { SignupForm } from '../signup-form';
 import { checkAuth } from '@/service/api';
 import { toast } from 'sonner';
+import { useAuth } from '@/lib/auth-context';
+import { useRouter } from 'next/navigation';
 
 export default function Cart() {
   const { items, totalItems, totalPrice, updateQuantity, removeItem } = useCart();
   const [modal, setModal] = useState<'none' | 'login' | 'signup'>('none');
+  const {isAuthenticated} = useAuth()
+  const router = useRouter();
 
   // Move all hooks before any conditional returns
   useEffect(() => {
@@ -31,19 +35,14 @@ export default function Cart() {
     };
   }, [modal]);
 
-  const handleCheckout = async () => {
-    try {
-    const isAuthenticated = await checkAuth();
-    console.log('User authenticated:', isAuthenticated);
+  const handleCheckout = () => {
     if (isAuthenticated) {
       // Redirect to checkout page
-      window.location.href = '/checkout';
+     console.log(isAuthenticated)
+     router.replace("/checkout")
     } else {
-      setModal('login');
+      setModal("login");
     }
-  } catch(error:any) {
-    setModal("login")
-  }
   };
 
   const handleIncrease = (referenceId: string, currentQty: number, stock: number) => {
@@ -260,7 +259,7 @@ const handleDecrease = (referenceId: string, currentQty: number) => {
           >
             <div className="p-2">
               {modal === "login" ? (
-                <LoginForm onSwitch={() => setModal("signup")} />
+                <LoginForm onLoginSuccess={() => setModal("none")} onSwitch={() => setModal("signup")} />
               ) : (
                 <SignupForm onSwitch={() => setModal("login")} />
               )}
