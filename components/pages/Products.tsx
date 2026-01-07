@@ -299,7 +299,7 @@ export default function Products() {
                     <SheetHeader>
                       <SheetTitle>Filters</SheetTitle>
                     </SheetHeader>
-                    <div className="mt-6">
+                    <div className="mt-6 px-4">
                       <FilterContent />
                     </div>
                   </SheetContent>

@@ -1,32 +1,34 @@
-"use client"
+"use client";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
-import { toast } from "sonner"
-import { login, resendVerification } from "@/service/api"
-import { useState } from "react"
+import { toast } from "sonner";
+import { login, resendVerification } from "@/service/api";
+import { useState } from "react";
 
-import ForgotPasswordModal from "./ForgotPasswordModal"
-import VerificationPendingModal from "./VerificationPendingModal"
-import { useAuth } from "@/lib/auth-context"
+import ForgotPasswordModal from "./ForgotPasswordModal";
+import VerificationPendingModal from "./VerificationPendingModal";
+import { useAuth } from "@/lib/auth-context";
+import OTPModal from "./OTPModal";
+import ChangePasswordModal from "./ChangePasswordModal";
 
 type LoginFormProps = React.ComponentProps<"div"> & {
   onSwitch?: () => void;
@@ -36,9 +38,9 @@ type LoginFormProps = React.ComponentProps<"div"> & {
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
-})
+});
 
-type LoginFormValues = z.infer<typeof loginSchema>
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm({
   className,
@@ -53,69 +55,95 @@ export function LoginForm({
     reset,
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-  })
+  });
 
   const [forgotPassowrd, setForgotPassword] = useState(false);
-  const [isVerificationPending, setIsVerificationPending] = useState(false)
-  const [verificationEmail, setVerificationEmail] = useState("")
-  const {setIsAuthenticated} = useAuth();
+  const [isVerificationPending, setIsVerificationPending] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState("");
+  const [showOTPModal, setShowOTPModal] = useState(false);
+  const [showEditPasswordModal, setShowEditPasswordModal] = useState(false);
+
+  const { setIsAuthenticated } = useAuth();
 
   async function onSubmit(values: LoginFormValues) {
     try {
-      const response = await login({ email: values.email, password: values.password })
-      
-      console.log('Login response:', response)
+      const response = await login({
+        email: values.email,
+        password: values.password,
+      });
 
-    
+      console.log("Login response:", response);
+
       if (response?.error) {
-        toast.error(response.error)
-        return
+        toast.error(response.error);
+        return;
       }
 
       if (response?.message) {
-        toast.success(response.message)
+        toast.success(response.message);
       }
 
       // Reset form and close modal on success
-      reset()
-      onLoginSuccess?.()
-      setIsAuthenticated(true)
+      reset();
+      onLoginSuccess?.();
+      setIsAuthenticated(true);
       // window.location.reload();
-      
-      toast.success("Logged In Successfully")
-      
-    } catch (error : any) {
-      console.error('Login error:', error)
-      toast.error(error.message || "Something went wrong")
-      if(error.message === "User account is disabled.") {
-          setIsVerificationPending(true)
-          setVerificationEmail(values.email)
-          resendVerificationEmail()
+
+      toast.success("Logged In Successfully");
+    } catch (error: any) {
+      console.error("Login error:", error);
+      toast.error(error.message || "Something went wrong");
+      if (error.message === "User account is disabled.") {
+        setIsVerificationPending(true);
+        setVerificationEmail(values.email);
+        resendVerificationEmail();
       }
-      
     }
   }
 
   const resendVerificationEmail = async () => {
     try {
-      await resendVerification(verificationEmail)
-    } catch(error: any) {
-      toast.error(error.message)
+      await resendVerification(verificationEmail);
+    } catch (error: any) {
+      toast.error(error.message);
     }
-  }
+  };
 
-  if(forgotPassowrd) {
+  if (forgotPassowrd) {
     return (
-    <ForgotPasswordModal setForgotPassword={setForgotPassword}/>
-    )
+      <ForgotPasswordModal
+        setShowOTPModal={setShowOTPModal}
+        setForgotPassword={setForgotPassword}
+      />
+    );
   }
 
-  if(isVerificationPending) {
+  if (showOTPModal) {
     return (
-      <VerificationPendingModal reset={reset} setIsVerificationPending={setIsVerificationPending} verificationEmail={verificationEmail} />
-    )
+      <OTPModal
+        setShowEditPasswordModal={setShowEditPasswordModal}
+        setShowOTPModal={setShowOTPModal}
+      />
+    );
   }
 
+  if (showEditPasswordModal) {
+    return (
+      <ChangePasswordModal
+        setShowEditPasswordModal={setShowEditPasswordModal}
+      />
+    );
+  }
+
+  if (isVerificationPending) {
+    return (
+      <VerificationPendingModal
+        reset={reset}
+        setIsVerificationPending={setIsVerificationPending}
+        verificationEmail={verificationEmail}
+      />
+    );
+  }
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -135,7 +163,7 @@ export function LoginForm({
                   id="email"
                   type="email"
                   placeholder="m@example.com"
-                  {...register('email')}
+                  {...register("email")}
                 />
                 {errors.email?.message && (
                   <FieldDescription className="text-destructive">
@@ -153,11 +181,11 @@ export function LoginForm({
                     Forgot your password?
                   </p>
                 </div>
-                <Input 
-                  id="password" 
-                  type="password" 
+                <Input
+                  id="password"
+                  type="password"
                   placeholder="••••••••"
-                  {...register('password')}
+                  {...register("password")}
                 />
                 {errors.password?.message && (
                   <FieldDescription className="text-destructive">
@@ -170,7 +198,7 @@ export function LoginForm({
                   {isSubmitting ? "Logging in..." : "Login"}
                 </Button>
                 <FieldDescription className="text-center">
-                  Don&apos;t have an account?{' '}
+                  Don&apos;t have an account?{" "}
                   <button
                     type="button"
                     onClick={onSwitch}
@@ -185,5 +213,5 @@ export function LoginForm({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
