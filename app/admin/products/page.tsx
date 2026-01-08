@@ -105,7 +105,7 @@ const matchedCategory = categories.find(
       setFormData({
         name: product.name,
         description: product.description,
-        price: product.price.toString(),
+        price: product.original_price?.toString(),
         stock: product.stock.toString(),
         in_stock: product.in_stock,
         category: matchedCategory?.reference_id || "", // Use reference_id from category object
@@ -285,10 +285,10 @@ const matchedCategory = categories.find(
       title: 'Price',
       render: (product: ProductResponse) => (
         <div className="space-y-1">
-          <div className="font-semibold">Rs. {parseFloat(product.price).toFixed(2)}</div>
+          <div className="font-semibold">Rs. {parseFloat(product.original_price?.toString() || "").toFixed(2)}</div>
           {product.discount_price && parseFloat(product.discount_price) > 0 && (
             <div className="text-sm text-green-600">
-              Sale: Rs. {parseFloat(product.discount_price).toFixed(2)}
+              Sale: Rs. {parseFloat(product.price).toFixed(2)}
             </div>
           )}
         </div>

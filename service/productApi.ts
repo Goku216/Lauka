@@ -52,6 +52,7 @@ export interface ProductResponse {
   rating?: number;
   reviews?: number;
   discount_percentage?: number;
+  original_price: number;
 }
 
 class ProductApi {

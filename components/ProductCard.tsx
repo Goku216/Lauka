@@ -96,11 +96,11 @@ export function ProductCard({ product }: ProductCardProps) {
           {product.discount_price ? (
             <>
               <span className="text-lg font-bold text-primary">
-                रू {product.discount_price}
+                रू {product.price}
               </span>
               {product.price && (
                 <span className="text-sm text-muted-foreground line-through">
-                  रू {product.price}
+                  रू {product.original_price}
                 </span>
               )}
             </>

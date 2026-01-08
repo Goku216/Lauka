@@ -18,6 +18,7 @@ export interface Product {
   rating?: number;
   reviews?: number;
   discount_percentage?: number;
+  original_price: number;
 }
 
 export interface Category {

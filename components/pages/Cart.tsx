@@ -143,9 +143,9 @@ export default function Cart() {
                     <span className="font-bold text-primary">
                       रू {item.product.price}
                     </span>
-                    {item.product.price && (
+                    {item.product.discount_price && (
                       <span className="text-sm text-muted-foreground line-through">
-                        रू {item.product.price}
+                        रू {item.product.original_price}
                       </span>
                     )}
                   </div>

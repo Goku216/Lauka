@@ -126,15 +126,6 @@ export default function ProductDetail({ id }: { id: string | undefined }) {
 
   const allImages = getAllImages();
 
-  // Calculate discount percentage
-  const getDiscountPercentage = () => {
-    if (!product?.discount_price || !product?.price) return null;
-    const price = parseFloat(product.price);
-    const discountPrice = parseFloat(product.discount_price);
-    return Math.round(((price - discountPrice) / price) * 100);
-  };
-
-  const discountPercentage = getDiscountPercentage();
 
   // Loading state
   if (loading) {
@@ -196,9 +187,9 @@ export default function ProductDetail({ id }: { id: string | undefined }) {
               </div>
               {/* Badges */}
               <div className="absolute top-4 left-4 flex flex-col gap-2">
-                {discountPercentage && (
+                {product.discount_percentage  && (
                   <span className="badge-discount text-base px-3 py-1">
-                    {discountPercentage}% OFF
+                    {product.discount_percentage}% OFF
                   </span>
                 )}
                 {product.is_new && (
@@ -255,11 +246,11 @@ export default function ProductDetail({ id }: { id: string | undefined }) {
             {/* Price */}
             <div className="flex items-baseline gap-3">
               <span className="text-4xl font-bold text-primary">
-                रू {product.discount_price || product.price}
+                रू {product.price}
               </span>
-              {product.discount_price && product.price && (
+              {product.discount_price &&   (
                 <span className="text-xl text-muted-foreground line-through">
-                  रू {product.price}
+                  रू {product.original_price}
                 </span>
               )}
               {product.unit && (
