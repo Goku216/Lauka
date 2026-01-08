@@ -50,11 +50,11 @@ const OTPModal = ({
   });
 
   async function onSubmit(values: OTPFormValues) {
-    console.log(values.otp);
+   
     reset();
     setShowOTPModal(false);
     setShowEditPasswordModal(true);
-    console.log();
+  
   }
 
   return (

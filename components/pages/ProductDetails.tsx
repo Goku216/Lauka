@@ -45,7 +45,6 @@ export default function ProductDetail({ id }: { id: string | undefined }) {
         const data: Product = await response.json();
         setProduct(data);
         setSelectedImage(data.image);
-        console.log("Quantity", data.stock)
         // Fetch related products by category
         if (data.category) {
           fetchRelatedProducts(data.category, data.reference_id);
@@ -110,9 +109,6 @@ export default function ProductDetail({ id }: { id: string | undefined }) {
   // Get all images (main image + additional images)
   const getAllImages = (): string[] => {
     if (!product) return [];
-
-
-    console.log("Products", product)
     
     const allImages = [product.image];
     
@@ -124,8 +120,6 @@ export default function ProductDetail({ id }: { id: string | undefined }) {
         }
       });
     }
-
-    console.log("Images", allImages)
     
     return allImages;
   };

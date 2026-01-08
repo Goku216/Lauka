@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Lauka",
+  title: "Leukaa",
   description: "Fresh from Farm",
 };
 

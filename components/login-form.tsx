@@ -72,7 +72,7 @@ export function LoginForm({
         password: values.password,
       });
 
-      console.log("Login response:", response);
+     
 
       if (response?.error) {
         toast.error(response.error);

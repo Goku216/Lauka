@@ -26,7 +26,7 @@ export default function Privacy() {
                 <h2 className="text-xl font-bold m-0">Information We Collect</h2>
               </div>
               <p className="text-muted-foreground">
-                When you place an order with Lauka, we collect the following information:
+                When you place an order with Leukaa, we collect the following information:
               </p>
               <ul className="text-muted-foreground mt-4 space-y-2">
                 <li>• Full name and contact details (phone number, email)</li>
@@ -82,7 +82,7 @@ export default function Privacy() {
               <p className="text-sm text-muted-foreground">
                 If you have any questions about this Privacy Policy, please contact us at:
                 <br />
-                <strong>Email:</strong> info@lauka.com
+                <strong>Email:</strong> info@leukaa.com
                 <br />
                 <strong>Phone:</strong> +977 98XXXXXXXX
               </p>

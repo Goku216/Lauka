@@ -13,7 +13,7 @@ export function Footer() {
   return (
     <footer className="bg-foreground text-background">
       {/* Newsletter */}
-      <div className="bg-primary py-8">
+      {/* <div className="bg-primary py-8">
         <div className="container-custom">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
@@ -31,7 +31,7 @@ export function Footer() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Main Footer */}
       <div className="container-custom py-12">
@@ -42,7 +42,7 @@ export function Footer() {
               <div className="bg-primary p-2 rounded-full">
                 <Leaf className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="text-lg font-bold">Lauka</span>
+              <span className="text-lg font-bold">Leukaa</span>
             </div>
             <p className="text-background/70 mb-4">
               Bringing fresh, organic produce from local Lumbini farms directly to your doorstep. 
@@ -143,7 +143,7 @@ export function Footer() {
         <div className="container-custom py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-background/60 text-sm">
-              © 2024 Lauka. All rights reserved.
+              © 2024 Leukaa. All rights reserved.
             </p>
             <div className="flex gap-4 text-sm">
               <Link href="/delivery" className="text-background/60 hover:text-primary transition-colors">

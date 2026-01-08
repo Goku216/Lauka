@@ -92,7 +92,7 @@ export default function About() {
               <h2 className="section-title mb-6">Our Story</h2>
               <div className="space-y-4 text-muted-foreground">
                 <p>
-                  Lauka started in 2020 with a simple idea: make fresh, organic 
+                  Leukaa started in 2020 with a simple idea: make fresh, organic 
                   produce accessible to everyone in Lumbini Province. What began as a small 
                   family farm has grown into a community of farmers, all committed to organic 
                   and sustainable farming practices.

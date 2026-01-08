@@ -77,7 +77,7 @@ export function Header({ setModal }: HeaderProps) {
               <Leaf className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">Lauka</h1>
+              <h1 className="text-xl font-bold text-foreground">Leukaa</h1>
               <p className="text-xs text-muted-foreground">Fresh from Farm</p>
             </div>
           </Link>

@@ -83,7 +83,6 @@ export default function Products() {
         // Handle if your API returns paginated or direct array
         const categoriesData = data.results || data;
         setCategories(categoriesData);
-        console.log(response)
       } catch (err) {
         console.error('Error fetching categories:', err);
       }
@@ -129,13 +128,13 @@ export default function Products() {
       // If filtering by category, use the category endpoint
       if (selectedCategories.length === 1) {
         url = `${API_BASE_URL}/products/${selectedCategories[0]}/by-category/?${params.toString()}`;
+        
       }
       
       const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch products');
       
       const data: PaginatedResponse = await response.json();
-      console.log("Productrs; ", data.results)
       setProducts(data.results);
       setTotalCount(data.count);
       setNextPage(data.next);

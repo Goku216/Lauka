@@ -19,7 +19,7 @@ import { bulkAddToCart, cartPayload, createOrder, OrderPayload } from '@/service
 
 export default function Checkout() {
   const { items, totalPrice, clearCart } = useCart();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
@@ -37,11 +37,11 @@ export default function Checkout() {
   const [errors, setErrors] = useState<Partial<CheckoutForm>>({});
 
   useEffect(() => {
+     if (loading) return;
     if (!isAuthenticated) {
       router.push('/');
     }
-    console.log("Check auth", isAuthenticated)
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, loading]);
 
 
    const scrollToTop = () => {
@@ -177,12 +177,53 @@ export default function Checkout() {
   }
   };
 
+  const validateField = (field: keyof CheckoutForm, value: string) => {
+  let error = '';
+
+  switch (field) {
+    case 'fullName':
+      if (!value.trim()) error = 'Full name is required';
+      break;
+
+    case 'phone':
+      if (!value.trim()) error = 'Phone number is required';
+      else if (!/^[0-9]{10}$/.test(value.replace(/\s/g, '')))
+        error = 'Enter a valid 10-digit phone number';
+      break;
+
+    case 'email':
+      if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+        error = 'Enter a valid email address';
+      break;
+
+    case 'address':
+      if (!value.trim()) error = 'Address is required';
+      break;
+
+    case 'district':
+      if (!value) error = 'Please select a district';
+      break;
+
+    case 'city':
+      if (!value.trim()) error = 'City is required';
+      break;
+  }
+
+  return error;
+};
+
+
   const updateForm = (field: keyof CheckoutForm, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
-  };
+  setForm((prev) => ({ ...prev, [field]: value }));
+
+  const error = validateField(field, value);
+
+  setErrors((prev) => ({
+    ...prev,
+    [field]: error || undefined,
+  }));
+};
+
 
   return (
     <Protected>

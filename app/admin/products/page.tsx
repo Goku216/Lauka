@@ -221,7 +221,6 @@ const matchedCategory = categories.find(
         is_featured: formData.is_featured,
         is_new: formData.is_new,
       };
-      console.log('Submitting product with data:', apiData);
 
       if (editingProduct) {
         await productApi.updateProduct(editingProduct.reference_id, apiData);

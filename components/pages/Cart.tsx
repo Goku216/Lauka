@@ -1,63 +1,71 @@
 "use client";
 
-import { Layout } from '@/components/layout/Layout';
-import { Button } from '@/components/ui/button';
-import { useCart } from '@/context/CartContext';
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, MapPin, X } from 'lucide-react';
-import Link from 'next/link';
-import { LoginForm } from '../login-form';
-import { useState, useEffect } from 'react';
-import { SignupForm } from '../signup-form';
-import { toast } from 'sonner';
-import { useAuth } from '@/lib/auth-context';
-import { useRouter } from 'next/navigation';
+import { Layout } from "@/components/layout/Layout";
+import { Button } from "@/components/ui/button";
+import { useCart } from "@/context/CartContext";
+import {
+  Minus,
+  Plus,
+  Trash2,
+  ShoppingBag,
+  ArrowRight,
+  MapPin,
+  X,
+} from "lucide-react";
+import Link from "next/link";
+import { LoginForm } from "../login-form";
+import { useState, useEffect } from "react";
+import { SignupForm } from "../signup-form";
+import { toast } from "sonner";
+import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
 
 export default function Cart() {
-  const { items, totalItems, totalPrice, updateQuantity, removeItem } = useCart();
-  const [modal, setModal] = useState<'none' | 'login' | 'signup'>('none');
-  const {isAuthenticated} = useAuth()
+  const { items, totalItems, totalPrice, updateQuantity, removeItem } =
+    useCart();
+  const [modal, setModal] = useState<"none" | "login" | "signup">("none");
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
 
   // Move all hooks before any conditional returns
   useEffect(() => {
-    if (modal !== 'none') document.body.classList.add('overflow-hidden');
-    else document.body.classList.remove('overflow-hidden');
+    if (modal !== "none") document.body.classList.add("overflow-hidden");
+    else document.body.classList.remove("overflow-hidden");
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setModal('none');
+      if (e.key === "Escape") setModal("none");
     };
 
-    window.addEventListener('keydown', onKey);
+    window.addEventListener("keydown", onKey);
     return () => {
-      document.body.classList.remove('overflow-hidden');
-      window.removeEventListener('keydown', onKey);
+      document.body.classList.remove("overflow-hidden");
+      window.removeEventListener("keydown", onKey);
     };
   }, [modal]);
 
   const handleCheckout = () => {
     if (isAuthenticated) {
-      // Redirect to checkout page
-     console.log(isAuthenticated)
-     router.replace("/checkout")
+      router.replace("/checkout");
     } else {
       setModal("login");
     }
   };
 
-  const handleIncrease = (referenceId: string, currentQty: number, stock: number) => {
-  if (currentQty >= stock) {
-    toast.error('No more stock available');
-    return;
-  }
-  updateQuantity(referenceId, currentQty + 1);
-};
+  const handleIncrease = (
+    referenceId: string,
+    currentQty: number,
+    stock: number
+  ) => {
+    if (currentQty >= stock) {
+      toast.error("No more stock available");
+      return;
+    }
+    updateQuantity(referenceId, currentQty + 1);
+  };
 
-const handleDecrease = (referenceId: string, currentQty: number) => {
-  updateQuantity(referenceId, currentQty - 1);
-};
-
-
-
+  const handleDecrease = (referenceId: string, currentQty: number) => {
+    updateQuantity(referenceId, currentQty - 1);
+  };
 
   // Now check for empty cart after all hooks are called
   if (items.length === 0) {
@@ -70,7 +78,8 @@ const handleDecrease = (referenceId: string, currentQty: number) => {
             </div>
             <h1 className="text-2xl font-bold mb-4">Your Cart is Empty</h1>
             <p className="text-muted-foreground mb-8">
-              Looks like you haven't added any products yet. Start shopping to fill your cart with fresh organic goodness!
+              Looks like you haven't added any products yet. Start shopping to
+              fill your cart with fresh organic goodness!
             </p>
             <Link href="/products">
               <Button className="btn-primary">
@@ -258,7 +267,10 @@ const handleDecrease = (referenceId: string, currentQty: number) => {
           >
             <div className="p-2">
               {modal === "login" ? (
-                <LoginForm onLoginSuccess={() => setModal("none")} onSwitch={() => setModal("signup")} />
+                <LoginForm
+                  onLoginSuccess={() => setModal("none")}
+                  onSwitch={() => setModal("signup")}
+                />
               ) : (
                 <SignupForm onSwitch={() => setModal("login")} />
               )}

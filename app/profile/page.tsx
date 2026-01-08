@@ -171,7 +171,7 @@ export default function UserProfile() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [orders, setOrders] = useState<OrderResponse[]>([]);
   const [profile, setProfile] = useState<Profile>();
-  const { isAuthenticated, logoutUser } = useAuth();
+  const { isAuthenticated, logoutUser, loading } = useAuth();
   const router = useRouter();
 
   const [editForm, setEditForm] = useState({
@@ -180,22 +180,23 @@ export default function UserProfile() {
     phone: "",
   });
 
-
-
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset
+    reset,
   } = useForm<PasswordFormValues>({
     resolver: zodResolver(editPasswordSchema),
+    mode: "onChange",
+    reValidateMode: "onChange"
   });
 
   useEffect(() => {
+    if (loading) return;
     if (!isAuthenticated) {
       router.replace("/");
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, loading]);
 
   useEffect(() => {
     fetchOrders();
@@ -254,14 +255,12 @@ export default function UserProfile() {
 
   const handleSaveProfile = () => {
     // Handle save profile logic here
-    console.log("Saving profile:", editForm);
     setShowEditProfileModal(false);
   };
 
   const onSubmit = (data: PasswordFormValues) => {
-    console.log(data);
-    reset()
-    setShowEditPasswordModal(false)
+    reset();
+    setShowEditPasswordModal(false);
   };
 
   const tabs = [
@@ -291,7 +290,7 @@ export default function UserProfile() {
                 <Leaf className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
               </div>
               <h1 className="text-lg sm:text-xl font-bold text-foreground">
-                Lauka
+                Leukaa
               </h1>
             </Link>
 
@@ -787,26 +786,9 @@ export default function UserProfile() {
                   <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground shrink-0" />
                 </div>
 
-                <div className="flex items-center justify-between p-3 sm:p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <Settings className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-sm sm:text-base text-foreground">
-                        Notifications
-                      </p>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        Configure email and push notifications
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground shrink-0" />
-                </div>
-
                 <Separator />
 
-                <div className="flex items-center justify-between p-3 sm:p-4 rounded-xl hover:bg-destructive/10 transition-colors cursor-pointer">
+                <div onClick={logoutUser} className="flex items-center justify-between p-3 sm:p-4 rounded-xl hover:bg-destructive/10 transition-colors cursor-pointer">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
                       <LogOut className="w-4 h-4 sm:w-5 sm:h-5 text-destructive" />

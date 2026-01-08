@@ -36,7 +36,7 @@ const ChangePasswordModal = ({
     resolver: zodResolver(editPasswordSchema),
   });
   const onSubmit = (data: PasswordFormValues) => {
-    console.log(data);
+  
     reset();
     setShowEditPasswordModal(false);
   };

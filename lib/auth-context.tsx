@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, SetStateAction, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { checkAuth, logout } from "@/service/api";
 import { toast } from "sonner";
 
@@ -25,7 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const res = await checkAuth();
 
-      setIsAuthenticated(res.isAuthenticated === true);
+      setIsAuthenticated(res.isAuthenticated);
       setIsAdmin(res.role === "admin");
     } catch (error) {
       setIsAuthenticated(false);
@@ -37,18 +43,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     checkAuthentication();
-
-    const interval = setInterval(checkAuthentication, 60000);
-    return () => clearInterval(interval);
   }, []);
 
   const logoutUser = async () => {
     try {
       await logout();
-    } catch(error: any) {
-      toast.error(error.message)
-    }
-     finally {
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
       setIsAuthenticated(false);
       setIsAdmin(false);
     }
@@ -56,7 +58,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, setIsAuthenticated, isAdmin, loading, logoutUser }}
+      value={{
+        isAuthenticated,
+        setIsAuthenticated,
+        isAdmin,
+        loading,
+        logoutUser,
+      }}
     >
       {children}
     </AuthContext.Provider>
