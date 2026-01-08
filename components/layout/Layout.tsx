@@ -2,8 +2,8 @@
 import { ReactNode, useState } from 'react';
 import { Header } from './Header';
 import { Footer } from './Footer';
-import { LoginForm } from '../login-form';
-import { SignupForm } from '../signup-form';
+import { LoginForm } from '../Auth/login-form';
+import { SignupForm } from '../Auth/signup-form';
 import { X } from 'lucide-react';
 
 interface LayoutProps {

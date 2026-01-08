@@ -17,6 +17,25 @@ export interface RegisterPayload {
     password: string;
 }
 
+export interface changeUserPasswordPayload {
+  old_password: string;
+  new_password: string;
+  confirm_password: string;
+}
+
+export interface ResetPasswordPayload {
+  email: string;
+  new_password: string;
+  confirm_password: string;
+}
+
+export interface VerifyOTPPayload {
+  email: string;
+  otp: string;
+}
+
+
+
 export const login = async (data: LoginPayload) => {
   try {
     const response = await apiClient.post<any>("/auth/login/", data)
@@ -146,4 +165,87 @@ export const unbanUser = async (id:string): Promise<any> => {
     throw new Error(message);
   }
 };
+
+export const changeUserPassword = async (data: changeUserPasswordPayload): Promise<any> => {
+  try {
+    const response = await apiClient.post("/auth/change-password/", data)
+    return response
+  } catch(error: any) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      "Failed to fetch orders";
+
+    throw new Error(message);
+  }
+}
+
+
+export const forgotPassword = async (email: string): Promise<any> => {
+  try {
+    const response = await apiClient.post("/auth/forgot-password/", {
+      email: email
+    })
+    return response
+  }
+  catch(error: any) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      "Failed to fetch orders";
+
+    throw new Error(message);
+  }
+}
+
+export const resendOTP = async (email: string): Promise<any> => {
+   try {
+    const response = await apiClient.post("/auth/forgot-password/resend-otp/", {
+      email: email
+    })
+    return response
+  }
+  catch(error: any) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      "Failed to fetch orders";
+
+    throw new Error(message);
+  }
+  
+}
+
+export const verifyOTP = async (data: VerifyOTPPayload): Promise<any> => {
+   try {
+    const response = await apiClient.post("/auth/forgot-password/verify-otp/", data)
+    return response
+  }
+  catch(error: any) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      "Failed to fetch orders";
+
+    throw new Error(message);
+  }
+  
+}
+
+
+export const resetPassword = async (data: ResetPasswordPayload): Promise<any> => {
+   try {
+    const response = await apiClient.post("/auth/forgot-password/reset-password/", data)
+    return response
+  }
+  catch(error: any) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      "Failed to fetch orders";
+
+    throw new Error(message);
+  }
+  
+}
 

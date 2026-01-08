@@ -62,6 +62,7 @@ export function LoginForm({
   const [verificationEmail, setVerificationEmail] = useState("");
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [showEditPasswordModal, setShowEditPasswordModal] = useState(false);
+  const [email, setEmail] = useState("");
 
   const { setIsAuthenticated } = useAuth();
 
@@ -112,6 +113,7 @@ export function LoginForm({
   if (forgotPassowrd) {
     return (
       <ForgotPasswordModal
+        setEmail={setEmail}
         setShowOTPModal={setShowOTPModal}
         setForgotPassword={setForgotPassword}
       />
@@ -121,6 +123,7 @@ export function LoginForm({
   if (showOTPModal) {
     return (
       <OTPModal
+        email={email}
         setShowEditPasswordModal={setShowEditPasswordModal}
         setShowOTPModal={setShowOTPModal}
       />
@@ -130,6 +133,7 @@ export function LoginForm({
   if (showEditPasswordModal) {
     return (
       <ChangePasswordModal
+      email={email}
         setShowEditPasswordModal={setShowEditPasswordModal}
       />
     );

@@ -1,14 +1,14 @@
 "use client";
-import z from "zod";
-import { Button } from "./ui/button";
+import z, { email } from "zod";
+import { Button } from "../ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./ui/card";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "./ui/field";
+} from "../ui/card";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "../ui/field";
 
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,11 +17,14 @@ import {
   InputOTPGroup,
   InputOTPSeparator,
   InputOTPSlot,
-} from "./ui/input-otp";
+} from "../ui/input-otp";
+import { toast } from "sonner";
+import { resendOTP, verifyOTP } from "@/service/api";
 
 interface OTPModalProps {
   setShowOTPModal: (value: boolean) => void;
   setShowEditPasswordModal: (value: boolean) => void;
+  email: string;
 }
 
 const otpSchema = z.object({
@@ -36,11 +39,12 @@ type OTPFormValues = z.infer<typeof otpSchema>;
 const OTPModal = ({
   setShowOTPModal,
   setShowEditPasswordModal,
+  email
 }: OTPModalProps) => {
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { isSubmitting, errors },
     reset,
   } = useForm<OTPFormValues>({
     resolver: zodResolver(otpSchema),
@@ -49,11 +53,31 @@ const OTPModal = ({
     },
   });
 
+  const handleResend = async () => {
+    try {
+      const response = await resendOTP(email)
+      toast.success(response.message)
+    } catch(error: any) {
+      toast.error(error.message)
+    }
+
+  }
+
   async function onSubmit(values: OTPFormValues) {
-   
+    try {
+      const apiData = {
+        email: email,
+        otp: values.otp
+      }
+      const response = await verifyOTP(apiData);
+      toast.success(response.message || "OTP Verified Successfully!")
     reset();
     setShowOTPModal(false);
     setShowEditPasswordModal(true);
+    }
+    catch(error: any) {
+      toast.error(error.message)
+    }
   
   }
 
@@ -103,9 +127,15 @@ const OTPModal = ({
                   </FieldDescription>
                 )}
               </Field>
+              <div className="flex gap-2 text-sm font-medium items-center">
+                <p>Didn't get the code?</p>
+                <button type="button" onClick={handleResend}>
+                <p className="text-primary/80 hover:text-primary/50 hover:underline cursor-pointer">Resend Verification</p>
+                </button>
+              </div>
 
               <Field className="space-y-2">
-                <Button type="submit" className="w-full">
+                <Button disabled={isSubmitting} type="submit" className="w-full">
                   Verify OTP
                 </Button>
 

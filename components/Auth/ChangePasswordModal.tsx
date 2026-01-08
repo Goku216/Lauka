@@ -3,11 +3,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { Eye, EyeOff, Save, X } from "lucide-react";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import z from "zod";
+import { toast } from "sonner";
+import { resetPassword, ResetPasswordPayload } from "@/service/api";
 
 export const editPasswordSchema = z
   .object({
@@ -23,22 +25,38 @@ export type PasswordFormValues = z.infer<typeof editPasswordSchema>;
 
 const ChangePasswordModal = ({
   setShowEditPasswordModal,
+  email,
 }: {
+  email: string;
   setShowEditPasswordModal: (value: boolean) => void;
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { isSubmitting, errors },
     reset,
   } = useForm<PasswordFormValues>({
     resolver: zodResolver(editPasswordSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
-  const onSubmit = (data: PasswordFormValues) => {
-  
-    reset();
-    setShowEditPasswordModal(false);
+  const onSubmit = async (data: PasswordFormValues) => {
+    try {
+      const apiData: ResetPasswordPayload = {
+        email: email,
+        new_password: data.newPassword,
+        confirm_password: data.confirmPassword,
+      };
+
+      const response = await resetPassword(apiData);
+      toast.success(response.message || "Password Chnaged Successfully!");
+
+      reset();
+      setShowEditPasswordModal(false);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to change password. Try Again!");
+    }
   };
 
   return (
@@ -149,6 +167,7 @@ const ChangePasswordModal = ({
             <Button
               className="flex-1 bg-primary hover:bg-primary/90"
               type="submit"
+              disabled={isSubmitting}
             >
               <Save className="w-4 h-4 mr-2" />
               Change Password

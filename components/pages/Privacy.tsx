@@ -82,7 +82,7 @@ export default function Privacy() {
               <p className="text-sm text-muted-foreground">
                 If you have any questions about this Privacy Policy, please contact us at:
                 <br />
-                <strong>Email:</strong> info@leukaa.com
+                <strong>Email:</strong> leukaa2026@gmail.com
                 <br />
                 <strong>Phone:</strong> +977 98XXXXXXXX
               </p>

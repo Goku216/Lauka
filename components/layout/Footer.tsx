@@ -113,7 +113,7 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-5 w-5 text-primary shrink-0" />
-                <span className="text-background/70">info@lumbiniorganic.com</span>
+                <span className="text-background/70">leukaa2026@gmail.com</span>
               </li>
             </ul>
             <div className="mt-4 p-3 bg-background/10 rounded-lg">

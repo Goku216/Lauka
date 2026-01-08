@@ -13,9 +13,9 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { LoginForm } from "../login-form";
+import { LoginForm } from "../Auth/login-form";
 import { useState, useEffect } from "react";
-import { SignupForm } from "../signup-form";
+import { SignupForm } from "../Auth/signup-form";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";

@@ -29,7 +29,7 @@ function useMounted() {
 }
 
 export function AdminLayout({ children }: React.PropsWithChildren) {
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAuthenticated, isAdmin, loading } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -40,10 +40,11 @@ export function AdminLayout({ children }: React.PropsWithChildren) {
 
   /* ---------- AUTH REDIRECT ---------- */
   useEffect(() => {
+    if(loading) return
     if (!isAuthenticated || !isAdmin) {
       router.push("/");
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, loading]);
 
   /* ---------- LOAD SIDEBAR STATE ---------- */
   useEffect(() => {

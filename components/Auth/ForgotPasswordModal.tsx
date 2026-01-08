@@ -6,19 +6,20 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./ui/card";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { useState } from "react";
+} from "../ui/card";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
 import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "./ui/field";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "../ui/field";
 import { toast } from "sonner";
+import { forgotPassword } from "@/service/api";
 
 interface ForgotPasswordModalProps {
   setForgotPassword: (value: boolean) => void;
   setShowOTPModal: (value: boolean) => void;
+  setEmail: (value: string) => void;
 }
 
 const emailSchema = z.object({
@@ -30,9 +31,8 @@ type ForgotPasswordFormValues = z.infer<typeof emailSchema>;
 const ForgotPasswordModal = ({
   setForgotPassword,
   setShowOTPModal,
+  setEmail
 }: ForgotPasswordModalProps) => {
-  const [isloading, setIsLoading] = useState(false);
-
   const {
     register,
     handleSubmit,
@@ -44,20 +44,16 @@ const ForgotPasswordModal = ({
 
   async function onSubmit(values: ForgotPasswordFormValues) {
     try {
-      // Clear form first
-      reset({
-        email: "",
-      });
-      
-      setForgotPassword(false)
-      setShowOTPModal(true)
-      
-    } catch (error) {
-      toast.error("Registration failed. Please try again.");
+      const response = await forgotPassword(values.email);
+      reset();
+      setForgotPassword(false);
+      setEmail(values.email)
+      setShowOTPModal(true);
+      toast.success(response.message);
+    } catch (error: any) {
+      toast.error("Failed to send OTP. Try Again!");
     }
   }
-
-
 
   return (
     <div className="flex flex-col gap-6">
@@ -87,7 +83,7 @@ const ForgotPasswordModal = ({
                 )}
               </Field>
               <Field>
-                <Button variant="default" className="w-full">
+                <Button disabled={isSubmitting} type="submit" variant="default" className="w-full">
                   Reset Password
                 </Button>
                 <Button
