@@ -1,4 +1,4 @@
-import { Profile, UsersResponse } from "@/types";
+import { DashboardResponse, Profile, UsersResponse } from "@/types";
 import apiClient from "./ApiConfig/apiClient";
 
 export interface LoginPayload {
@@ -100,10 +100,26 @@ export const resendVerification = async (email: string): Promise<any> => {
 
 export const getProfile = async (): Promise<Profile> => {
   try {
-    const response = await apiClient.get<any>("/auth/profile")
+    const response = await apiClient.get<any>("/auth/profile/")
     return response
   }
   catch(error: any) {
+        const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      "Failed Sending Verification"
+
+    throw new Error(message)
+  }
+}
+
+export const getAdminStats = async (): Promise<DashboardResponse> => {
+  try {
+    const response = await apiClient.get<DashboardResponse>("/admin/dashboard/")
+    return response
+    
+  }
+   catch(error: any) {
         const message =
       error?.response?.data?.message ||
       error?.response?.data?.error ||

@@ -180,6 +180,53 @@ export interface Profile {
 }
 
 
+//Dashboard Types
+// ===== Root Response =====
+export interface DashboardResponse {
+  stats: DashboardStats;
+  sales_chart: SalesChartItem[];
+  products_by_category: ProductsByCategoryItem[];
+  recent_activity: RecentActivityItem[];
+}
+
+// ===== Stats =====
+export interface DashboardStats {
+  total_users: string | number;
+  total_products: number;
+  total_categories: number;
+  total_sales: number;
+}
+
+// ===== Sales Chart =====
+export interface SalesChartItem {
+  date: string;      // e.g. "Mon", "Tue"
+  sales: number;
+  orders: number;
+}
+
+// ===== Products By Category =====
+export interface ProductsByCategoryItem {
+  name: string;
+  value: number | string;
+  [key: string]: string | number;
+}
+
+// ===== Recent Activity =====
+export type ActivityType =
+  | "PRODUCT_UPDATED"
+  | "USER_REGISTERED"
+  | "ORDER_COMPLETED"
+  | "CATEGORY_ADDED";
+
+export interface RecentActivityItem {
+  activity_type: ActivityType;
+  description: string;
+  user_email: string;
+  time_ago: string; // e.g. "2 minutes ago"
+}
+
+
+
 
 
 

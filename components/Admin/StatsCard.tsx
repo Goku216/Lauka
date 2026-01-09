@@ -5,15 +5,13 @@ import { TrendingUp, TrendingDown } from 'lucide-react';
 
 interface StatsCardProps {
   title: string;
-  value: string | number;
+  value: string | number | undefined;
   change?: number;
   icon: React.ReactNode;
   className?: string;
 }
 
-export function StatsCard({ title, value, change, icon, className }: StatsCardProps) {
-  const isPositive = change && change > 0;
-  const isNegative = change && change < 0;
+export function StatsCard({ title, value, icon, className }: StatsCardProps) {
 
   return (
     <Card className={cn('overflow-hidden', className)}>
@@ -22,24 +20,6 @@ export function StatsCard({ title, value, change, icon, className }: StatsCardPr
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground">{title}</p>
             <p className="text-2xl font-bold text-foreground">{value}</p>
-            {change !== undefined && (
-              <div className="flex items-center gap-1">
-                {isPositive && <TrendingUp className="w-4 h-4 text-success" />}
-                {isNegative && <TrendingDown className="w-4 h-4 text-destructive" />}
-                <span
-                  className={cn(
-                    'text-sm font-medium',
-                    isPositive && 'text-success',
-                    isNegative && 'text-destructive',
-                    !isPositive && !isNegative && 'text-muted-foreground'
-                  )}
-                >
-                  {isPositive && '+'}
-                  {change}%
-                </span>
-                <span className="text-sm text-muted-foreground">vs last month</span>
-              </div>
-            )}
           </div>
           <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
             {icon}

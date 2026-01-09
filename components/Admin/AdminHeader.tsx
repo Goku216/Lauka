@@ -1,8 +1,8 @@
-
-import { Bell, Search, User } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useAuth } from '@/lib/auth-context';
+"use client";
+import { Bell, Search, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useAuth } from "@/lib/auth-context";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,34 +10,44 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import Link from 'next/link';
-import { toast } from 'sonner';
-
+} from "@/components/ui/dropdown-menu";
+import Link from "next/link";
+import { toast } from "sonner";
+import { useEffect, useState } from "react";
+import { getProfile } from "@/service/api";
 
 interface AdminHeaderProps {
   title: string;
 }
 
-const user = {
-  name: "",
-  email: ""
-}
-
 export function AdminHeader({ title }: AdminHeaderProps) {
+  const [user, setUser] = useState({
+    name: "Admin",
+    email: "admin@gmail.com",
+  });
 
-  const {logoutUser} = useAuth()
+  const { logoutUser } = useAuth();
 
+  useEffect(() => {
+    async function fetchProfile() {
+      const res = await getProfile();
+      setUser({
+        name: res.username,
+        email: res.email,
+      });
+    }
+    fetchProfile();
+  }, []);
 
   const handleLogout = async () => {
     try {
-      await logoutUser()
-      toast.success('Logged out successfully');
+      await logoutUser();
+      toast.success("Logged out successfully");
     } catch (error) {
-      toast.error('Logout failed');
-      console.error('Logout failed:', error);
+      toast.error("Logout failed");
+      console.error("Logout failed:", error);
     }
-  }
+  };
 
   return (
     <header className="sticky top-0 z-30 h-16 bg-background/95 backdrop-blur border-b border-border">
@@ -70,7 +80,7 @@ export function AdminHeader({ title }: AdminHeaderProps) {
                   <User className="w-4 h-4 text-primary" />
                 </div>
                 <span className="hidden sm:inline text-sm font-medium">
-                  {user?.name || 'User'}
+                  {user?.name || "User"}
                 </span>
               </Button>
             </DropdownMenuTrigger>
@@ -88,7 +98,10 @@ export function AdminHeader({ title }: AdminHeaderProps) {
                 <Link href="/admin/settings">Settings</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="text-destructive"
+              >
                 Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
