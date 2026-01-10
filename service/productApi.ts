@@ -1,4 +1,6 @@
 import { IconName } from "@/extras/icon-map";
+import apiClient from "./ApiConfig/apiClient";
+import { WishlistResponse } from "@/types";
 
 // API service for product operations
 const API_BASE_URL =
@@ -223,6 +225,58 @@ class ProductApi {
       throw new Error("Failed to delete product");
     }
   }
+
+  //Add wishlist
+  async addToWishlist(id: string): Promise<any> {
+    try {
+      const response = await apiClient.post("/wishlist/add/", {
+        product_id: id,
+      });
+      return response
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        "Failed to add product";
+
+      throw new Error(message);
+    }
+  }
+
+  
+  //Remove from wishlist
+    async removeFromWishlist(id: string): Promise<any> {
+    try {
+      const response = await apiClient.delete("/wishlist/remove/", {
+        product_id: String(id),
+      });
+      return response
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        "Failed to remove wishlist";
+
+      throw new Error(message);
+    }
+  }
+
+  //get wishlist
+  async getWishlist(): Promise<any> {
+    try {
+      const response = await apiClient.get<WishlistResponse>("/wishlist/")
+      return response
+
+    } 
+    catch(error: any){
+      const message = error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      "Failed to fetch wishlist"
+    }
+  }
+
 }
 
 export const productApi = new ProductApi();
+
+

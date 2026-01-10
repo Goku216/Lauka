@@ -26,6 +26,7 @@ import {
   Ban,
   ArrowRight,
   KeyRound,
+  Trash2Icon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,8 +49,9 @@ import { useRouter } from "next/navigation";
 import { getOrders, OrderResponse } from "@/service/OrderApi";
 import { toast } from "sonner";
 import { getProfile } from "@/service/api";
-import { Profile } from "@/types";
+import { Profile, WishlistResponse } from "@/types";
 import ProfileChangePasswordModal from "@/components/UserProfile/ProfileChangePasswordModal";
+import { productApi } from "@/service/productApi";
 
 // Mock user data
 const mockUser = {
@@ -77,28 +79,6 @@ export const mockAddresses = [
     address: "456 Market Avenue, Suite 100",
     city: "San Francisco, CA 94103",
     isDefault: false,
-  },
-];
-
-// Mock wishlist
-const mockWishlist = [
-  {
-    id: "1",
-    name: "Organic Avocados (6 pack)",
-    price: 12.99,
-    image: "/placeholder.svg",
-  },
-  {
-    id: "2",
-    name: "Fresh Strawberries",
-    price: 8.99,
-    image: "/placeholder.svg",
-  },
-  {
-    id: "3",
-    name: "Artisan Sourdough Bread",
-    price: 6.5,
-    image: "/placeholder.svg",
   },
 ];
 
@@ -144,28 +124,25 @@ const getStatusConfig = (status: string) => {
   }
 };
 
-
-
 export default function UserProfile() {
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedOrder, setSelectedOrder] = useState<OrderResponse>();
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [showEditPasswordModal, setShowEditPasswordModal] = useState(false);
- 
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [orders, setOrders] = useState<OrderResponse[]>([]);
   const [profile, setProfile] = useState<Profile>();
   const { isAuthenticated, logoutUser, loading } = useAuth();
   const router = useRouter();
+  const [wishlist, setWishlist] = useState<WishlistResponse>();
 
   const [editForm, setEditForm] = useState({
     name: "",
     email: "",
     phone: "",
   });
-
-
 
   useEffect(() => {
     if (loading) return;
@@ -177,6 +154,7 @@ export default function UserProfile() {
   useEffect(() => {
     fetchOrders();
     fetchProfile();
+    fetchWishlist();
   }, []);
 
   const fetchOrders = async () => {
@@ -195,6 +173,15 @@ export default function UserProfile() {
       setProfile(response);
     } catch (error: any) {
       console.log(error);
+      toast.error(error.message);
+    }
+  };
+
+  const fetchWishlist = async () => {
+    try {
+      const response = await productApi.getWishlist();
+      setWishlist(response);
+    } catch (error: any) {
       toast.error(error.message);
     }
   };
@@ -234,7 +221,25 @@ export default function UserProfile() {
     setShowEditProfileModal(false);
   };
 
- 
+  const handleDeleteWishlist = async (id: string) => {
+    try {
+      const response = await productApi.removeFromWishlist(id);
+      toast.success(response.message);
+      setWishlist((prev) => {
+        if (!prev) return prev;
+
+        return {
+          ...prev,
+          count: prev.count - 1,
+          results: prev.results.filter(
+            (item) => item.product.reference_id !== id
+          ),
+        };
+      });
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
 
   const tabs = [
     { value: "overview", label: "Overview", icon: User },
@@ -429,7 +434,7 @@ export default function UserProfile() {
                     <Heart className="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
                   </div>
                   <p className="text-xl sm:text-2xl font-bold text-foreground">
-                    {mockWishlist.length}
+                    {wishlist?.count}
                   </p>
                   <p className="text-xs sm:text-sm text-muted-foreground">
                     Wishlist Items
@@ -469,6 +474,18 @@ export default function UserProfile() {
               </CardHeader>
               <CardContent className="p-4 sm:p-2 pt-0">
                 <div className="space-y-3 sm:space-y-4">
+                  {orders.length === 0 && (
+                    <div className="text-center max-w-md mx-auto">
+                      <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Package className="h-12 w-12 text-muted-foreground" />
+                      </div>
+                      <h1 className="text-2xl font-bold mb-4">Empty Order</h1>
+                      <p className="text-muted-foreground mb-8">
+                        Looks like you haven't ordered any products yet. Start
+                        ordering to see order status
+                      </p>
+                    </div>
+                  )}
                   {orders.slice(0, 2).map((order) => {
                     const statusConfig = getStatusConfig(order.status);
                     const StatusIcon = statusConfig.icon;
@@ -673,34 +690,65 @@ export default function UserProfile() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4 sm:p-6 pt-0">
+                {wishlist?.count === 0 && (
+                  <div className="items-center flex">
+                    <div className="text-center max-w-md mx-auto">
+                      <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Heart className="h-12 w-12 text-muted-foreground" />
+                      </div>
+                      <h1 className="text-2xl font-bold mb-4">
+                        Empty Wishlist
+                      </h1>
+                      <p className="text-muted-foreground mb-8">
+                        Looks like you haven't added any products to the
+                        wishlist yet. Start adding products to see wishlisted
+                        products.
+                      </p>
+                      <Link href="/products">
+                        <Button className="btn-primary">
+                          Products
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                )}
                 <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                  {mockWishlist.map((item) => (
+                  {wishlist?.results?.map((item) => (
                     <div
-                      key={item.id}
+                      key={item.wishlist_id}
                       className="card-product p-3 sm:p-4 group"
                     >
                       <div className="aspect-square rounded-lg bg-muted mb-2 sm:mb-3 flex items-center justify-center overflow-hidden">
-                        <ShoppingBag className="w-8 h-8 sm:w-12 sm:h-12 text-muted-foreground" />
+                        <img src={item.product.image || ""} />
                       </div>
                       <h3 className="font-semibold text-xs sm:text-sm text-foreground line-clamp-2 mb-1">
-                        {item.name}
+                        {item.product.name}
                       </h3>
                       <p className="text-sm sm:text-lg font-bold text-primary">
-                        रू{item.price.toFixed(2)}
+                        रू{Number(item.product.price).toFixed(2)}
                       </p>
-                      <div className="flex gap-2 mt-2 sm:mt-3">
-                        <Button
-                          size="sm"
-                          className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground text-xs"
+                      <div className="flex justify-between gap-2 mt-2 sm:mt-3">
+                        <Link
+                          href={`/products/${item.product.reference_id}`}
+                          className=""
                         >
-                          Add to Cart
-                        </Button>
+                          <Button
+                            size="sm"
+                            className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm"
+                          >
+                            View Product
+                          </Button>
+                        </Link>
                         <Button
                           size="icon"
                           variant="outline"
                           className="h-8 w-8 sm:h-9 sm:w-9 border-destructive text-destructive hover:bg-destructive hover:text-primary-foreground"
+                          onClick={() =>
+                            handleDeleteWishlist(item.product.reference_id)
+                          }
                         >
-                          <Heart className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
+                          <Trash2Icon className="w-3 h-3 sm:w-4 sm:h-4 " />
                         </Button>
                       </div>
                     </div>
@@ -761,7 +809,10 @@ export default function UserProfile() {
 
                 <Separator />
 
-                <div onClick={logoutUser} className="flex items-center justify-between p-3 sm:p-4 rounded-xl hover:bg-destructive/10 transition-colors cursor-pointer">
+                <div
+                  onClick={logoutUser}
+                  className="flex items-center justify-between p-3 sm:p-4 rounded-xl hover:bg-destructive/10 transition-colors cursor-pointer"
+                >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
                       <LogOut className="w-4 h-4 sm:w-5 sm:h-5 text-destructive" />
@@ -1038,7 +1089,9 @@ export default function UserProfile() {
       {/* Edit Password Modal */}
 
       {showEditPasswordModal && (
-       <ProfileChangePasswordModal setShowEditPasswordModal={setShowEditPasswordModal} />
+        <ProfileChangePasswordModal
+          setShowEditPasswordModal={setShowEditPasswordModal}
+        />
       )}
     </div>
   );

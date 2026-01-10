@@ -226,6 +226,18 @@ export interface RecentActivityItem {
 }
 
 
+//Wishlist types
+export interface Wishlist {
+  wishlist_id: string;
+  product: Product
+}
+
+export interface WishlistResponse {
+  count: number;
+  results: Wishlist[]
+}
+
+
 
 
 

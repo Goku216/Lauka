@@ -4,9 +4,11 @@ import { ShoppingCart, Heart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import Link from "next/link";
-import { ProductResponse } from "@/service/productApi";
+import { productApi, ProductResponse } from "@/service/productApi";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { WishlistResponse } from "@/types";
+import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
   product: ProductResponse;
@@ -15,6 +17,22 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const { addItem, items } = useCart();
   const [cartQuantity, setCartQuantity] = useState(0);
+  const [wishlist, setWishlist] = useState<WishlistResponse | undefined>()
+
+
+  useEffect(() => {
+    async function fetchWishlist() {
+      try {
+        const res = await productApi.getWishlist()
+        setWishlist(res)
+      }
+      catch(error: any){
+        console.log(error.message)
+      }
+    }
+
+    fetchWishlist()
+  }, [])
 
   const handleAddToCart = () => {
     const existingCartItem = items.find(
@@ -32,6 +50,69 @@ export function ProductCard({ product }: ProductCardProps) {
     addItem(product);
   };
 
+const handleWishlistToggle = async () => {
+  if (isInWishlist) {
+    await handleRemoveWishlist();
+  } else {
+    await handleAddWishlist();
+  }
+};
+
+
+const handleAddWishlist = async () => {
+  try {
+    const res = await productApi.addToWishlist(product.reference_id);
+
+    setWishlist(prev => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        count: prev.count + 1,
+        results: [
+          ...prev.results,
+          {
+            wishlist_id: crypto.randomUUID(), // temporary
+            product,
+          },
+        ],
+      };
+    });
+
+    toast.success(res.message);
+  } catch (error: any) {
+    toast.error(error.message);
+  }
+};
+
+const handleRemoveWishlist = async () => {
+  try {
+    await productApi.removeFromWishlist(product.reference_id);
+
+    setWishlist(prev => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        count: prev.count - 1,
+        results: prev.results.filter(
+          item => item.product.reference_id !== product.reference_id
+        ),
+      };
+    });
+
+    toast.success("Removed from wishlist");
+  } catch (error: any) {
+    toast.error(error.message);
+  }
+};
+
+
+  const isInWishlist = wishlist?.results.some(
+  item => item.product.reference_id === product.reference_id
+) ?? false;
+
+
   return (
     <div className="card-product group overflow-hidden">
       {/* Image Container */}
@@ -48,15 +129,29 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="absolute top-3 left-3 flex flex-col gap-2">
           {product.discount_price && (
             <span className="badge-discount">
-              {product.discount_percentage}% OFF
+              {Number(product.discount_percentage)?.toFixed(0)}% OFF
             </span>
           )}
           {product.is_new && <span className="badge-new">NEW</span>}
         </div>
 
         {/* Wishlist Button */}
-        <button className="absolute top-3 right-3 bg-card/90 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-card">
-          <Heart className="h-4 w-4 text-muted-foreground hover:text-destructive transition-colors" />
+        <button
+          onClick={handleWishlistToggle}
+
+          className={cn(
+            "absolute top-3 right-3 bg-card/90 p-2 rounded-full transition-opacity hover:bg-card cursor-pointer",
+            isInWishlist ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+          )}
+        >
+          <Heart
+            className={cn(
+              "h-4 w-4 transition-colors",
+              isInWishlist
+                ? "fill-destructive text-destructive"
+                : "text-muted-foreground hover:text-destructive"
+            )}
+          />
         </button>
 
         {/* Quick Add */}

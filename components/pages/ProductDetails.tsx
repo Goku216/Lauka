@@ -189,7 +189,7 @@ export default function ProductDetail({ id }: { id: string | undefined }) {
               <div className="absolute top-4 left-4 flex flex-col gap-2">
                 {product.discount_percentage  && (
                   <span className="badge-discount text-base px-3 py-1">
-                    {product.discount_percentage}% OFF
+                    {Number(product.discount_percentage).toFixed(0)}% OFF
                   </span>
                 )}
                 {product.is_new && (

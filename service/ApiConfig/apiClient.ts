@@ -55,8 +55,11 @@ class apiClient {
 
 
 
-    delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-        return this.client.delete(url, config);
+    delete<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+          return this.client.delete(url, {
+        ...config,
+        data,
+    });
     }
 }
 
