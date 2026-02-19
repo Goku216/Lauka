@@ -7,7 +7,7 @@ import { CategoryResponse } from '@/service/productApi';
 interface CategoryCardProps {
   category: CategoryResponse;
 }
-//Card Component
+//Card Component 
 export function CategoryCard({ category }: CategoryCardProps) {
   const Icon = ICON_MAP[category.icon] || Leaf;
 
