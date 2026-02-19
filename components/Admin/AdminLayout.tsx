@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// Map routes to page titles
+// Map routes to page titles //
 const pageTitles: Record<string, string> = {
   "/admin": "Dashboard",
   "/admin/products": "Products",
