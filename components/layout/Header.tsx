@@ -63,7 +63,7 @@ export function Header({ setModal }: HeaderProps) {
           </div>
           <div className="flex items-center gap-2">
             <Phone className="h-4 w-4" />
-            <span>+977 98XXXXXXXX</span>
+            <span>+977 9857083725</span>
           </div>
         </div>
       </div>
