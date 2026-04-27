@@ -99,7 +99,7 @@ export const getAllOrders = async (params?: {
 
   try {
     const response = await apiClient.get<OrdersResponse>(
-      `/admin/orders?${queryParams.toString()}`
+      `/admin/orders/?${queryParams.toString()}`
     );
     return response;
   } catch (error: any) {

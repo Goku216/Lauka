@@ -47,6 +47,6 @@ export interface Categories {
     reference_id: string;
     name: string;
     is_active: boolean;
-    icon: string;
+    logo: string;
     slug: string;
 }

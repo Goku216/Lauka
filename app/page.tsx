@@ -5,18 +5,41 @@ import { Hero } from "@/components/Hero";
 import { TrustBadges } from "@/components/TrustBadges";
 import { DeliveryBanner } from "@/components/DeliveryBanner";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 
 import Link from "next/link";
 import CategoriesSection from "@/components/Landing/CategoriesSection";
 import { useAuth } from "@/lib/auth-context";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CategoryResponse } from "@/service/productApi";
+import { getCategories } from "@/service/categoryApi";
+import { toast } from "sonner";
 
 const page = () => {
   // const featuredProducts = getFeaturedProducts();
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
+  const [categories, setCategories] = useState<CategoryResponse[]>([])
+    const [categoryLoading, setCategoryLoading] = useState(false)
+
+    useEffect(() => {
+        fetchCategories()
+        
+    }, [])
+    const fetchCategories = async () => {
+    setCategoryLoading(true);
+    try {
+      const {categories} = await getCategories();
+      
+      setCategories(categories);
+      
+    } catch (error) {
+      toast.error("Failed to fetch categories");
+    } finally {
+      setCategoryLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (loading) return;
@@ -69,56 +92,8 @@ const page = () => {
       </section> */}
 
       {/* Promotional Banner */}
-      <section className="py-8">
-        <div className="container-custom">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="relative overflow-hidden rounded-2xl bg-linear-to-r from-fresh-light to-accent p-8">
-              <div className="relative z-10">
-                <span className="text-sm font-medium text-primary">
-                  FRESH FRUITS
-                </span>
-                <h3 className="text-2xl font-bold text-foreground mt-2">
-                  Fresh Fruits
-                </h3>
-                <p className="text-3xl font-bold text-primary mt-1">30% OFF</p>
-                <Link href="/products">
-                  <Button className="mt-4 btn-primary">Shop Now</Button>
-                </Link>
-              </div>
-              <img
-                src="https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=200&h=200&fit=crop"
-                alt="Fresh fruits"
-                className="absolute right-4 bottom-4 w-32 h-32 object-cover rounded-full"
-              />
-            </div>
-            <div className="relative overflow-hidden rounded-2xl bg-linear-to-r from-lemon-light to-secondary/20 p-8">
-              <div className="relative z-10">
-                <span className="text-sm font-medium text-secondary-foreground">
-                  LEMON PLANTS
-                </span>
-                <h3 className="text-2xl font-bold text-foreground mt-2">
-                  Lemon Tree Saplings
-                </h3>
-                <p className="text-3xl font-bold text-primary mt-1">
-                  From रू 450
-                </p>
-                <Link href="/products">
-                  <Button className="mt-4 btn-primary">Shop Now</Button>
-                </Link>
-              </div>
-              <img
-                src="https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=200&h=200&fit=crop"
-                alt="Lemon plants"
-                className="absolute right-4 bottom-4 w-32 h-32 object-cover rounded-full"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Categories */}
-      <section className="py-16 bg-muted">
-        <div className="container-custom">
+     <section className="py-8">
+      <div className="container-custom">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="section-title">Browse by Category</h2>
@@ -136,10 +111,60 @@ const page = () => {
               </Button>
             </Link>
           </div>
+          {categoryLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+    <div className="grid md:grid-cols-2 gap-6">
+      {categories.map((category, index) => {
+        // Alternate gradient backgrounds
+        const gradients = [
+          "bg-gradient-to-r from-fresh-light to-accent",
+          "bg-gradient-to-r from-lemon-light to-secondary/20",
+          "bg-gradient-to-r from-blue-50 to-blue-100",
+          "bg-gradient-to-r from-purple-50 to-purple-100",
+          "bg-gradient-to-r from-orange-50 to-orange-100",
+          "bg-gradient-to-r from-pink-50 to-pink-100",
+        ];
 
-          <CategoriesSection />
-        </div>
-      </section>
+        const gradient = gradients[index % gradients.length];
+
+        return (
+          <div
+            key={category.reference_id}
+            className={`relative overflow-hidden rounded-2xl ${gradient} p-8`}
+          >
+            <div className="relative z-10">
+              <span className="text-sm font-medium text-primary uppercase tracking-wide">
+                {category.name}
+              </span>
+              <h3 className="text-2xl font-bold text-foreground mt-2">
+                {category.name}
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {category.product_count > 0
+                  ? `${category.product_count} Products Available`
+                  : "Coming Soon"}
+              </p>
+              <Link href={`/products?category=${category.reference_id}`}>
+                <Button className="mt-4 btn-primary">Shop Now</Button>
+              </Link>
+            </div>
+            <img
+              src={category.logo}
+              alt={category.name}
+              className="absolute right-4 bottom-4 w-32 h-32 object-cover rounded-full bg-white/50"
+            />
+          </div>
+        );
+      })}
+    </div>
+          )}
+  </div>
+</section>
+
+  
 
       {/* More Products */}
       {/* <section className="py-16 bg-background">

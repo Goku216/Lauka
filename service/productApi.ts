@@ -32,7 +32,7 @@ export interface CategoryResponse {
   name: string;
   is_active: boolean;
   slug: string;
-  icon: IconName;
+  logo: string;
   product_count: number;
 }
 
@@ -71,7 +71,7 @@ class ProductApi {
     if (params?.category) queryParams.append("category", params.category);
     if (params?.search) queryParams.append("search", params.search);
 
-    const response = await fetch(`${API_BASE_URL}/products?${queryParams}`, {
+    const response = await fetch(`${API_BASE_URL}/products/?${queryParams}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

@@ -62,7 +62,7 @@ export const registerUser = async (data: RegisterPayload): Promise<any> => {
 
 export const checkAuth = async (): Promise<any> => {
     try {
-        const response = await apiClient.get<any>("/auth/me");
+        const response = await apiClient.get<any>("/auth/me/");
         return response;
     } catch (error: any) {
         const message =
@@ -140,7 +140,7 @@ export const getAllUsers = async (params?: {
 
   try {
     const response = await apiClient.get<UsersResponse>(
-      `/admin/users?${queryParams.toString()}`
+      `/admin/users/?${queryParams.toString()}`
     );
     return response;
   } catch (error: any) {

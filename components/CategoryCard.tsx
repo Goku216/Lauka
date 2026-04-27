@@ -9,7 +9,7 @@ interface CategoryCardProps {
 }
 //Card Component 
 export function CategoryCard({ category }: CategoryCardProps) {
-  const Icon = ICON_MAP[category.icon] || Leaf;
+  const Icon =  Leaf ;
 
   return (
     <Link
