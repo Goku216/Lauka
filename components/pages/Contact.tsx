@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { useSiteConfig } from '@/context/SiteConfigContext';
 import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -11,6 +12,7 @@ import { toast } from 'sonner';
 
 export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const {config} = useSiteConfig()
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -64,8 +66,7 @@ export default function Contact() {
                   <div>
                     <h3 className="font-bold text-lg mb-1">Our Location</h3>
                     <p className="text-muted-foreground">
-                      Butwal, Rupandehi<br />
-                      Lumbini Province, Nepal
+                     {config?.full_address || "Butwal, Rupandeh, Lumbini Province, Nepal"}
                     </p>
                   </div>
                 </div>
@@ -76,7 +77,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-bold text-lg mb-1">Phone</h3>
-                    <p className="text-muted-foreground">+977 9857083725</p>
+                    <p className="text-muted-foreground">{config?.phone_number || "+977 9857083725"}</p>
                     <p className="text-sm text-muted-foreground">WhatsApp available</p>
                   </div>
                 </div>
@@ -87,7 +88,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-bold text-lg mb-1">Email</h3>
-                    <p className="text-muted-foreground">leukaa2026@gmail.com</p>
+                    <p className="text-muted-foreground">{config?.email || "leukaa2026@gmail.com"}</p>
                   </div>
                 </div>
 

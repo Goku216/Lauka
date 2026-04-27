@@ -1,6 +1,9 @@
+"use client"
+import { useSiteConfig } from '@/context/SiteConfigContext';
 import { MapPin, Truck } from 'lucide-react';
 
 export function DeliveryBanner() {
+  const {config} = useSiteConfig()
   return (
     <div className="bg-linear-to-r from-primary to-leaf text-primary-foreground py-4">
       <div className="container-custom">
@@ -10,10 +13,12 @@ export function DeliveryBanner() {
             <span className="font-medium">Delivery available only in Lumbini Province</span>
           </div>
           <div className="hidden sm:block w-1 h-1 bg-primary-foreground/50 rounded-full"></div>
-          <div className="flex items-center gap-2">
-            <Truck className="h-5 w-5" />
-            <span className="font-medium">Cash on Delivery Only</span>
-          </div>
+          {config?.cash_on_delivery && (
+            <div className="flex items-center gap-2">
+              <Truck className="h-5 w-5" />
+              <span className="font-medium">Cash on Delivery Only</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

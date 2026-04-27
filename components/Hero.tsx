@@ -1,8 +1,10 @@
+"use client"
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Leaf } from 'lucide-react';
 import Link from 'next/link';
-
+import { useSiteConfig } from '@/context/SiteConfigContext';
 export function Hero() {
+  const {config} = useSiteConfig()
   return (
     <section className="relative overflow-hidden bg-linear-to-br from-fresh-light via-background to-lemon-light">
       <div className="container-custom py-8 md:py-16 lg:py-24">
@@ -11,7 +13,7 @@ export function Hero() {
           <div className="space-y-6 animate-fade-in text-center md:text-start">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
               <Leaf className="h-4 w-4" />
-              100% Natural & Organic
+              {config?.organic_percentage || "100%"} Natural & Organic
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
@@ -42,15 +44,15 @@ export function Hero() {
             {/* Stats */}
             <div className="flex gap-8 pt-4">
               <div>
-                <p className="text-3xl font-bold text-primary">500+</p>
+                <p className="text-3xl font-bold text-primary">{config?.happy_customers || "500"}+</p>
                 <p className="text-sm text-muted-foreground">Happy Customers</p>
               </div>
               <div>
-                <p className="text-3xl font-bold text-primary">50+</p>
+                <p className="text-3xl font-bold text-primary">{config?.fresh_products || "50"}+</p>
                 <p className="text-sm text-muted-foreground">Fresh Products</p>
               </div>
               <div>
-                <p className="text-3xl font-bold text-primary">100%</p>
+                <p className="text-3xl font-bold text-primary">{config?.organic_percentage || "100"}%</p>
                 <p className="text-sm text-muted-foreground">Organic</p>
               </div>
             </div>

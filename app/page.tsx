@@ -8,32 +8,31 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Loader2 } from "lucide-react";
 
 import Link from "next/link";
-import CategoriesSection from "@/components/Landing/CategoriesSection";
 import { useAuth } from "@/lib/auth-context";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CategoryResponse } from "@/service/productApi";
 import { getCategories } from "@/service/categoryApi";
 import { toast } from "sonner";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 const page = () => {
   // const featuredProducts = getFeaturedProducts();
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
-  const [categories, setCategories] = useState<CategoryResponse[]>([])
-    const [categoryLoading, setCategoryLoading] = useState(false)
+  const [categories, setCategories] = useState<CategoryResponse[]>([]);
+  const [categoryLoading, setCategoryLoading] = useState(false);
+   
 
-    useEffect(() => {
-        fetchCategories()
-        
-    }, [])
-    const fetchCategories = async () => {
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+  const fetchCategories = async () => {
     setCategoryLoading(true);
     try {
-      const {categories} = await getCategories();
-      
+      const { categories } = await getCategories();
+
       setCategories(categories);
-      
     } catch (error) {
       toast.error("Failed to fetch categories");
     } finally {
@@ -92,8 +91,8 @@ const page = () => {
       </section> */}
 
       {/* Promotional Banner */}
-     <section className="py-8">
-      <div className="container-custom">
+      <section className="py-8">
+        <div className="container-custom">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="section-title">Browse by Category</h2>
@@ -116,55 +115,55 @@ const page = () => {
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
             </div>
           ) : (
-    <div className="grid md:grid-cols-2 gap-6">
-      {categories.map((category, index) => {
-        // Alternate gradient backgrounds
-        const gradients = [
-          "bg-gradient-to-r from-fresh-light to-accent",
-          "bg-gradient-to-r from-lemon-light to-secondary/20",
-          "bg-gradient-to-r from-blue-50 to-blue-100",
-          "bg-gradient-to-r from-purple-50 to-purple-100",
-          "bg-gradient-to-r from-orange-50 to-orange-100",
-          "bg-gradient-to-r from-pink-50 to-pink-100",
-        ];
+            <div className="grid md:grid-cols-2 gap-6">
+              {categories.map((category, index) => {
+                // Alternate gradient backgrounds
+                const gradients = [
+                  "bg-gradient-to-r from-fresh-light to-accent",
+                  "bg-gradient-to-r from-lemon-light to-secondary/20",
+                  "bg-gradient-to-r from-blue-50 to-blue-100",
+                  "bg-gradient-to-r from-purple-50 to-purple-100",
+                  "bg-gradient-to-r from-orange-50 to-orange-100",
+                  "bg-gradient-to-r from-pink-50 to-pink-100",
+                ];
 
-        const gradient = gradients[index % gradients.length];
+                const gradient = gradients[index % gradients.length];
 
-        return (
-          <div
-            key={category.reference_id}
-            className={`relative overflow-hidden rounded-2xl ${gradient} p-8`}
-          >
-            <div className="relative z-10">
-              <span className="text-sm font-medium text-primary uppercase tracking-wide">
-                {category.name}
-              </span>
-              <h3 className="text-2xl font-bold text-foreground mt-2">
-                {category.name}
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                {category.product_count > 0
-                  ? `${category.product_count} Products Available`
-                  : "Coming Soon"}
-              </p>
-              <Link href={`/products?category=${category.reference_id}`}>
-                <Button className="mt-4 btn-primary">Shop Now</Button>
-              </Link>
+                return (
+                  <div
+                    key={category.reference_id}
+                    className={`relative overflow-hidden rounded-2xl ${gradient} p-8`}
+                  >
+                    <div className="relative z-10">
+                      <span className="text-sm font-medium text-primary uppercase tracking-wide">
+                        {category.name}
+                      </span>
+                      <h3 className="text-2xl font-bold text-foreground mt-2">
+                        {category.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {category.product_count > 0
+                          ? `${category.product_count} Products Available`
+                          : "Coming Soon"}
+                      </p>
+                      <Link
+                        href={`/products?category=${category.reference_id}`}
+                      >
+                        <Button className="mt-4 btn-primary">Shop Now</Button>
+                      </Link>
+                    </div>
+                    <img
+                      src={category.logo}
+                      alt={category.name}
+                      className="absolute right-4 bottom-4 w-32 h-32 object-cover rounded-full bg-white/50"
+                    />
+                  </div>
+                );
+              })}
             </div>
-            <img
-              src={category.logo}
-              alt={category.name}
-              className="absolute right-4 bottom-4 w-32 h-32 object-cover rounded-full bg-white/50"
-            />
-          </div>
-        );
-      })}
-    </div>
           )}
-  </div>
-</section>
-
-  
+        </div>
+      </section>
 
       {/* More Products */}
       {/* <section className="py-16 bg-background">

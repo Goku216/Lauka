@@ -4,10 +4,12 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
+import { useSiteConfig } from '@/context/SiteConfigContext';
 
 
 export function Footer() {
   const {isAuthenticated, isAdmin} = useAuth()
+  const { config, loading: siteConfigLoading, error } = useSiteConfig();
 
  
   return (
@@ -42,20 +44,19 @@ export function Footer() {
               <div className="bg-primary p-2 rounded-full">
                 <Leaf className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="text-lg font-bold">Leukaa</span>
+              <span className="text-lg font-bold">{config?.site_name || "Leukaa"}</span>
             </div>
             <p className="text-background/70 mb-4">
-              Bringing fresh, organic produce from local Lumbini farms directly to your doorstep. 
-              Quality you can trust, freshness you can taste.
+              {config?.short_description || "Your trusted source for fresh and organic produce, delivered straight from local farms to your doorstep."}
             </p>
             <div className="flex gap-4">
-              <a href="#" className="text-background/70 hover:text-primary transition-colors">
+              <a href={config?.facebook} className="text-background/70 hover:text-primary transition-colors">
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="#" className="text-background/70 hover:text-primary transition-colors">
+              <a href={config?.instagram} className="text-background/70 hover:text-primary transition-colors">
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="#" className="text-background/70 hover:text-primary transition-colors">
+              <a href={config?.twitter} className="text-background/70 hover:text-primary transition-colors">
                 <Twitter className="h-5 w-5" />
               </a>
             </div>
@@ -105,22 +106,24 @@ export function Footer() {
             <ul className="space-y-3">
               <li className="flex items-start gap-2">
                 <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                <span className="text-background/70">Butwal, Rupandehi, Lumbini Province, Nepal</span>
+                <span className="text-background/70">{config?.full_address || "Butwal, Rupandehi, Lumbini Province, Nepal"}</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-5 w-5 text-primary shrink-0" />
-                <span className="text-background/70">+977 9857083725</span>
+                <span className="text-background/70">{config?.phone_number || "+977 9857083725"}</span>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-5 w-5 text-primary shrink-0" />
-                <span className="text-background/70">leukaa2026@gmail.com</span>
+                <span className="text-background/70">{config?.email || "leukaa2026@gmail.com"}</span>
               </li>
             </ul>
-            <div className="mt-4 p-3 bg-background/10 rounded-lg">
-              <p className="text-sm font-medium text-background/90">
-                💰 Cash on Delivery Only
-              </p>
-            </div>
+            {config?.cash_on_delivery && (
+              <div className="mt-4 p-3 bg-background/10 rounded-lg">
+                <p className="text-sm font-medium text-background/90">
+                  💰 Cash on Delivery Only
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -143,7 +146,7 @@ export function Footer() {
         <div className="container-custom py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-background/60 text-sm">
-              © 2024 Leukaa. All rights reserved.
+              © 2024 {config?.site_name || "Leukaa"}. All rights reserved.
             </p>
             <div className="flex gap-4 text-sm">
               <Link href="/delivery" className="text-background/60 hover:text-primary transition-colors">

@@ -18,6 +18,7 @@ import { useCart } from "@/context/CartContext";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 interface HeaderProps {
   setModal: (value: "none" | "login" | "signup") => void;
@@ -35,6 +36,7 @@ export function Header({ setModal }: HeaderProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const {isAuthenticated , logoutUser} = useAuth();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const { config } = useSiteConfig();
 
 
   const { totalItems } = useCart();
@@ -57,13 +59,13 @@ export function Header({ setModal }: HeaderProps) {
           <div className="flex items-center gap-2">
             <MapPin className="h-4 w-4" />
             <span className="hidden sm:inline">
-              Delivery available only in Lumbini Province
+              {config?.delivery_area || "Lumbini Province Only"}
             </span>
             <span className="sm:hidden">Lumbini Province Only</span>
           </div>
           <div className="flex items-center gap-2">
             <Phone className="h-4 w-4" />
-            <span>+977 9857083725</span>
+            <span>{config?.phone_number || "+977 9857083725"}</span>
           </div>
         </div>
       </div>
@@ -77,7 +79,7 @@ export function Header({ setModal }: HeaderProps) {
               <Leaf className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">Leukaa</h1>
+              <h1 className="text-xl font-bold text-foreground">{config?.site_name || "Leukaa"}</h1>
               <p className="text-xs text-muted-foreground">Fresh from Farm</p>
             </div>
           </Link>

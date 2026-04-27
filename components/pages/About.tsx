@@ -1,10 +1,13 @@
+"use client"
 import { Layout } from '@/components/layout/Layout';
 
 import { Button } from '@/components/ui/button';
+import { useSiteConfig } from '@/context/SiteConfigContext';
 import { Leaf, Heart, Users, MapPin, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 export default function About() {
+  const {config} = useSiteConfig()
   return (
     <Layout>
       {/* Hero */}
@@ -47,7 +50,7 @@ export default function About() {
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Leaf className="h-8 w-8 text-primary" />
               </div>
-              <h3 className="text-xl font-bold mb-3">100% Organic</h3>
+              <h3 className="text-xl font-bold mb-3">{config?.organic_percentage || "100%"} Organic</h3>
               <p className="text-muted-foreground">
                 All our products are grown without pesticides or harmful chemicals. 
                 We believe in natural farming methods that are good for you and the earth.
@@ -92,7 +95,7 @@ export default function About() {
               <h2 className="section-title mb-6">Our Story</h2>
               <div className="space-y-4 text-muted-foreground">
                 <p>
-                  Leukaa started in 2020 with a simple idea: make fresh, organic 
+                  {config?.site_name || "Leukaa"} started in 2020 with a simple idea: make fresh, organic 
                   produce accessible to everyone in Lumbini Province. What began as a small 
                   family farm has grown into a community of farmers, all committed to organic 
                   and sustainable farming practices.

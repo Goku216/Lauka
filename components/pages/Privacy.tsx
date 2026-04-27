@@ -1,7 +1,10 @@
+"use client"
 import { Layout } from '@/components/layout/Layout';
+import { useSiteConfig } from '@/context/SiteConfigContext';
 import { Shield, Eye, Lock, Users, FileText } from 'lucide-react';
 
 export default function Privacy() {
+  const {config} = useSiteConfig()
   return (
     <Layout>
       {/* Hero */}
@@ -82,9 +85,9 @@ export default function Privacy() {
               <p className="text-sm text-muted-foreground">
                 If you have any questions about this Privacy Policy, please contact us at:
                 <br />
-                <strong>Email:</strong> leukaa2026@gmail.com
+                <strong>Email:</strong> {config?.email || "leukaa2026@gmail.com"}
                 <br />
-                <strong>Phone:</strong> +977 98XXXXXXXX
+                <strong>Phone:</strong> {config?.phone_number || "+977 9857083725"}
               </p>
               <p className="text-sm text-muted-foreground mt-4">
                 <em>Last updated: December 2024</em>
