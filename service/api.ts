@@ -1,5 +1,6 @@
 import { DashboardResponse, Profile, UsersResponse } from "@/types";
 import apiClient from "./ApiConfig/apiClient";
+import { ConfigRecord } from "@/components/Admin/modals/CMSModal";
 
 export interface LoginPayload {
     email: string;
@@ -265,3 +266,32 @@ export const resetPassword = async (data: ResetPasswordPayload): Promise<any> =>
   
 }
 
+export const updateSiteConfiguration = async (data: FormData): Promise<any> => {
+  try {
+    const response = await apiClient.post("/master/site-settings/", data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response;
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      "Failed to update configuration"; 
+    throw new Error(message);
+  }
+}
+
+export const getSiteConfiguration = async (): Promise<ConfigRecord> => {
+  try {
+    const response = await apiClient.get<any>("/master/site-settings/");
+    return response.data;
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      "Failed to fetch configuration"; 
+    throw new Error(message);
+  }   
+}

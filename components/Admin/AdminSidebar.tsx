@@ -6,6 +6,7 @@ import {
   Users,
   FolderOpen,
   Settings,
+  FileText,
   LogOut,
   ChevronLeft,
   Menu,
@@ -23,6 +24,7 @@ const navItems = [
   { title: "Categories", href: "/admin/categories", icon: FolderOpen },
   { title: "Orders", href: "/admin/orders", icon: PackageOpen },
   { title: "Users", href: "/admin/users", icon: Users },
+  {title: "CMS Editor", href: "/admin/cms-editor", icon: FileText},
   { title: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
