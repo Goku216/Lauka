@@ -308,3 +308,16 @@ export const updateProfile = async (data: any): Promise<any> => {
     throw new Error(message);
   }
 }
+
+export const activateUser = async (id: string): Promise<any> => {
+  try {
+    const response = await apiClient.post<any>(`/admin/users/${id}/activate/`)
+    return response.data
+  } catch (error: any) {
+       const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      "Failed to fetch configuration"; 
+    throw new Error(message);
+  }
+}

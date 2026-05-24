@@ -8,7 +8,7 @@ import { Ban, CheckCircle, Loader2, User2 } from "lucide-react";
 import { AdminLayout } from "@/components/Admin/AdminLayout";
 import { toast } from "sonner";
 import { User } from "@/types";
-import { banUser, getAllUsers, unbanUser } from "@/service/api";
+import { activateUser, banUser, getAllUsers, unbanUser } from "@/service/api";
 
 export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
@@ -73,6 +73,17 @@ export default function Users() {
     }
   };
 
+  const handleActivateUser = async (user: User) => {
+    try {
+      const response = await activateUser(user.reference_id)
+      toast.success( "User Activated Successfully!")
+      fetchAllUsers()
+    } catch (error: any) {
+      toast.error(error.message || "Failed to activate user. Try Again!")
+    }
+
+  }
+
   const columns = [
     {
       key: "name",
@@ -116,6 +127,7 @@ export default function Users() {
       key: "actions",
       title: "Actions",
       render: (user: User) => (
+        <div className="flex gap-2 items-center justify-center">
         <Button
           disabled={user.is_admin}
           variant={user.is_banned ? "default" : "destructive"}
@@ -135,6 +147,17 @@ export default function Users() {
             </>
           )}
         </Button>
+        {
+          !user.is_active &&
+         <Button
+          variant="default"
+          size="sm"
+          onClick={() => handleActivateUser(user)}
+        >Activate</Button>
+    }
+        </div>
+
+        
       ),
     },
   ];
