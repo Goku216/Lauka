@@ -1,10 +1,10 @@
-"use client"
-import { Button } from '@/components/ui/button';
-import { ArrowRight, Leaf } from 'lucide-react';
-import Link from 'next/link';
-import { useSiteConfig } from '@/context/SiteConfigContext';
+"use client";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Leaf } from "lucide-react";
+import Link from "next/link";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 export function Hero() {
-  const {config} = useSiteConfig()
+  const { config } = useSiteConfig();
   return (
     <section className="relative overflow-hidden bg-linear-to-br from-fresh-light via-background to-lemon-light">
       <div className="container-custom py-8 md:py-16 lg:py-24">
@@ -15,36 +15,40 @@ export function Hero() {
               <Leaf className="h-4 w-4" />
               {config?.organic_percentage || "100%"} Natural & Organic
             </div>
-            
+
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
-              Fresh and Healthy{' '}
-              <span className="text-primary">Organic</span>{' '}
+              Fresh and Healthy <span className="text-primary">Organic</span>{" "}
               Products
             </h1>
-            
+
             <p className="text-lg text-muted-foreground max-w-lg">
-              Discover the finest organic fruits, vegetables, and lemon plants from 
-              local Lumbini farms. Delivered fresh to your doorstep.
+              Discover the finest organic fruits, vegetables, and lemon plants
+              from local Lumbini farms. Delivered fresh to your doorstep.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <div onClick={() => {
-    const section = document.getElementById("category");
+              <div
+                onClick={() => {
+                  const section = document.getElementById("category");
 
-    if (section) {
-      section.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }
-  }}>
+                  if (section) {
+                    section.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    });
+                  }
+                }}
+              >
                 <Button className="btn-primary text-lg px-10 py-7">
                   Shop Now
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </div>
               <Link href="/about">
-                <Button variant="outline" className="text-lg px-10 py-7 rounded-full border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                <Button
+                  variant="outline"
+                  className="text-lg px-10 py-7 rounded-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                >
                   Learn More
                 </Button>
               </Link>
@@ -53,15 +57,21 @@ export function Hero() {
             {/* Stats */}
             <div className="flex gap-8 pt-4">
               <div>
-                <p className="text-3xl font-bold text-primary">{config?.happy_customers || "500"}+</p>
+                <p className="text-3xl font-bold text-primary">
+                  {config?.happy_customers || "500"}+
+                </p>
                 <p className="text-sm text-muted-foreground">Happy Customers</p>
               </div>
               <div>
-                <p className="text-3xl font-bold text-primary">{config?.fresh_products || "50"}+</p>
+                <p className="text-3xl font-bold text-primary">
+                  {config?.fresh_products || "50"}+
+                </p>
                 <p className="text-sm text-muted-foreground">Fresh Products</p>
               </div>
               <div>
-                <p className="text-3xl font-bold text-primary">{config?.organic_percentage || "100"}%</p>
+                <p className="text-3xl font-bold text-primary">
+                  {config?.organic_percentage || "100"}%
+                </p>
                 <p className="text-sm text-muted-foreground">Organic</p>
               </div>
             </div>
@@ -76,18 +86,26 @@ export function Hero() {
               className="relative rounded-3xl shadow-2xl animate-bounce-gentle"
             />
             {/* Floating badges */}
-            <div className="absolute -left-4 top-1/4 bg-card p-4 rounded-2xl shadow-lg animate-fade-in" style={{ animationDelay: '0.3s' }}>
+            <div
+              className="absolute -left-4 top-1/4 bg-card p-4 rounded-2xl shadow-lg animate-fade-in"
+              style={{ animationDelay: "0.3s" }}
+            >
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-lemon rounded-full flex items-center justify-center">
                   🍋
                 </div>
                 <div>
                   <p className="font-bold text-foreground">Fresh Lemons</p>
-                  <p className="text-sm text-muted-foreground">From रू 180/kg</p>
+                  <p className="text-sm text-muted-foreground">
+                    From रू 180/kg
+                  </p>
                 </div>
               </div>
             </div>
-            <div className="absolute -right-4 bottom-1/4 bg-card p-4 rounded-2xl shadow-lg animate-fade-in" style={{ animationDelay: '0.5s' }}>
+            <div
+              className="absolute -right-4 bottom-1/4 bg-card p-4 rounded-2xl shadow-lg animate-fade-in"
+              style={{ animationDelay: "0.5s" }}
+            >
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-fresh-light rounded-full flex items-center justify-center">
                   🥬

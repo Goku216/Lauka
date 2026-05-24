@@ -295,3 +295,16 @@ export const getSiteConfiguration = async (): Promise<ConfigRecord> => {
     throw new Error(message);
   }   
 }
+
+export const updateProfile = async (data: any): Promise<any> => {
+  try {
+    const response = await apiClient.patch<any>("/auth/profile/", data)
+    return response.data
+  } catch (error: any) {
+       const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      "Failed to fetch configuration"; 
+    throw new Error(message);
+  }
+}

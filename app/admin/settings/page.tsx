@@ -16,7 +16,8 @@ import { AdminLayout } from "@/components/Admin/AdminLayout";
 import { toast } from "sonner";
 import NotificationSection from "@/components/Admin/settings/NotificationSection";
 import ChangePasswordSection from "@/components/Admin/settings/ChangePasswordSection";
-import { getProfile } from "@/service/api";
+import { getProfile, updateProfile } from "@/service/api";
+import { email } from "zod";
 
 export default function Settings() {
   const [profileData, setProfileData] = useState({
@@ -25,6 +26,9 @@ export default function Settings() {
   });
 
   useEffect(() => {
+  
+    fetchProfile();
+  }, []);
     async function fetchProfile() {
       const res = await getProfile();
       setProfileData({
@@ -32,12 +36,16 @@ export default function Settings() {
         email: res.email,
       });
     }
-    fetchProfile();
-  }, []);
 
-  const handleProfileUpdate = (e: React.FormEvent) => {
+  const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Your profile has been updated successfully.");
+    try {
+      await updateProfile({email: profileData.email, username: profileData.name})
+      toast.success("Profile Updated Successfully")
+      fetchProfile()
+    } catch (err : any) {
+      toast.error(err.message || "Failed to update profile!")
+    }
   };
 
   return (
