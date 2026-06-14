@@ -97,8 +97,9 @@ export default function Categories() {
 
     fetchCategories();
     setIsModalOpen(false);
-  }   catch (error) {
-      toast.error("Failed to save category. Please try again.");
+  }   catch (error : any) {
+      toast.error(error.message || "An error occurred");
+
   } finally {
       setUploading(false);
   }

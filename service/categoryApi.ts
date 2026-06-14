@@ -26,7 +26,7 @@ export const createCategory = async (data: FormData): Promise<any> => {
     return response;
   } catch (error: any) {
     throw new Error(
-      error.response?.data?.detail || "Failed to create category"
+      error.response?.data?.message || "Failed to create category"
     );
   }
 };

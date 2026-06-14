@@ -115,7 +115,7 @@ const page = () => {
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-3 md:gap-6">
               {categories.map((category, index) => {
                 // Alternate gradient backgrounds
                 const gradients = [
@@ -132,16 +132,21 @@ const page = () => {
                 return (
                   <div
                     key={category.reference_id}
-                    className={`relative overflow-hidden rounded-2xl ${gradient} p-8`}
+                    className={`flex flex-col items-center md:block md:relative overflow-hidden rounded-2xl ${gradient} p-4 md:p-8`}
                   >
-                    <div className="relative z-10">
-                      <span className="text-sm font-medium text-primary uppercase tracking-wide">
+                    <img
+                      src={category.logo}
+                      alt={category.name}
+                      className="w-20 h-20 object-cover rounded-full bg-white/50 mb-3 md:absolute md:right-4 md:bottom-4 md:w-32 md:h-32 md:mb-0"
+                    />
+                    <div className="text-center w-full md:text-left md:relative md:z-10">
+                      <span className="hidden md:block text-sm font-medium text-primary uppercase tracking-wide">
                         {category.name}
                       </span>
-                      <h3 className="text-2xl font-bold text-foreground mt-2">
+                      <h3 className="text-sm md:text-2xl font-bold text-foreground md:mt-2">
                         {category.name}
                       </h3>
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <p className="text-xs md:text-sm text-muted-foreground mt-1">
                         {category.product_count > 0
                           ? `${category.product_count} Products Available`
                           : "Coming Soon"}
@@ -149,14 +154,11 @@ const page = () => {
                       <Link
                         href={`/products?category=${category.reference_id}`}
                       >
-                        <Button className="mt-4 btn-primary">Shop Now</Button>
+                        <Button className="mt-3 btn-primary text-xs md:text-sm w-full md:w-auto md:mt-4">
+                          Shop Now
+                        </Button>
                       </Link>
                     </div>
-                    <img
-                      src={category.logo}
-                      alt={category.name}
-                      className="absolute right-4 bottom-4 w-32 h-32 object-cover rounded-full bg-white/50"
-                    />
                   </div>
                 );
               })}

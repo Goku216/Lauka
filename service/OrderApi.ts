@@ -77,7 +77,7 @@ export const createOrder = async (data: OrderPayload): Promise<any> => {
 };
 export const getOrders = async (): Promise<OrderResponse[]> => {
   try {
-    const response = await apiClient.get<OrderResponse[]>("/orders");
+    const response = await apiClient.get<OrderResponse[]>("/orders/");
     return response;
   } catch (error: any) {
     const message =
