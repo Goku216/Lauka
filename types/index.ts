@@ -34,6 +34,14 @@ export interface CartItem {
   quantity: number;
 }
 
+export interface SavedAddress {
+  id: string;
+  label: string;
+  district: string;
+  city: string;
+  fullAddress: string;
+}
+
 export interface CheckoutForm {
   fullName: string;
   phone: string;

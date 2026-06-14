@@ -36,6 +36,14 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -49,7 +57,7 @@ import { useRouter } from "next/navigation";
 import { getOrders, OrderResponse } from "@/service/OrderApi";
 import { toast } from "sonner";
 import { getProfile } from "@/service/api";
-import { Profile, WishlistResponse } from "@/types";
+import { Profile, WishlistResponse, SavedAddress, LUMBINI_DISTRICTS } from "@/types";
 import ProfileChangePasswordModal from "@/components/UserProfile/ProfileChangePasswordModal";
 import { productApi } from "@/service/productApi";
 
@@ -62,25 +70,7 @@ const mockUser = {
   memberSince: "January 2024",
 };
 
-// Mock addresses
-export const mockAddresses = [
-  {
-    id: "1",
-    type: "Home",
-    name: "Sarah Johnson",
-    address: "123 Fresh Street, Apt 4B",
-    city: "San Francisco, CA 94102",
-    isDefault: true,
-  },
-  {
-    id: "2",
-    type: "Work",
-    name: "Sarah Johnson",
-    address: "456 Market Avenue, Suite 100",
-    city: "San Francisco, CA 94103",
-    isDefault: false,
-  },
-];
+const ADDRESSES_STORAGE_KEY = "leukaa_saved_addresses";
 
 const getStatusConfig = (status: string) => {
   switch (status) {
@@ -144,6 +134,16 @@ export default function UserProfile() {
     phone: "",
   });
 
+  const [addresses, setAddresses] = useState<SavedAddress[]>([]);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
+  const [addressForm, setAddressForm] = useState({
+    label: "",
+    district: "",
+    city: "",
+    fullAddress: "",
+  });
+
   useEffect(() => {
     if (loading) return;
     if (!isAuthenticated) {
@@ -195,6 +195,64 @@ export default function UserProfile() {
       });
     }
   }, [profile]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(ADDRESSES_STORAGE_KEY);
+      if (stored) setAddresses(JSON.parse(stored));
+    } catch {}
+  }, []);
+
+  const persistAddresses = (updated: SavedAddress[]) => {
+    setAddresses(updated);
+    localStorage.setItem(ADDRESSES_STORAGE_KEY, JSON.stringify(updated));
+  };
+
+  const handleSaveAddress = () => {
+    const { label, district, city, fullAddress } = addressForm;
+    if (!district || !city.trim() || !fullAddress.trim()) {
+      toast.error("Please fill in District, City, and Full Address");
+      return;
+    }
+    if (editingAddressId) {
+      persistAddresses(
+        addresses.map((a) =>
+          a.id === editingAddressId
+            ? { id: a.id, label, district, city, fullAddress }
+            : a
+        )
+      );
+      setEditingAddressId(null);
+    } else {
+      persistAddresses([
+        ...addresses,
+        { id: Date.now().toString(), label, district, city, fullAddress },
+      ]);
+    }
+    setAddressForm({ label: "", district: "", city: "", fullAddress: "" });
+    setShowAddressForm(false);
+  };
+
+  const handleEditAddress = (address: SavedAddress) => {
+    setAddressForm({
+      label: address.label,
+      district: address.district,
+      city: address.city,
+      fullAddress: address.fullAddress,
+    });
+    setEditingAddressId(address.id);
+    setShowAddressForm(true);
+  };
+
+  const handleDeleteAddress = (id: string) => {
+    persistAddresses(addresses.filter((a) => a.id !== id));
+  };
+
+  const handleCancelAddressForm = () => {
+    setAddressForm({ label: "", district: "", city: "", fullAddress: "" });
+    setEditingAddressId(null);
+    setShowAddressForm(false);
+  };
 
   useEffect(() => {
     if (showOrderModal || showEditProfileModal) {
@@ -441,19 +499,19 @@ export default function UserProfile() {
                   </p>
                 </CardContent>
               </Card>
-              <Card className="shadow-card hover:shadow-card-hover transition-shadow sm:col-span-2 lg:col-span-1">
+              {/* <Card className="shadow-card hover:shadow-card-hover transition-shadow sm:col-span-2 lg:col-span-1">
                 <CardContent className="p-4 sm:p-6 text-center">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 rounded-full bg-primary/10 flex items-center justify-center">
                     <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   </div>
                   <p className="text-xl sm:text-2xl font-bold text-foreground">
-                    रू480.49
+                    रू
                   </p>
                   <p className="text-xs sm:text-sm text-muted-foreground">
                     Total Spent
                   </p>
                 </CardContent>
-              </Card>
+              </Card> */}
             </div>
 
             {/* Recent Orders Preview */}
@@ -620,63 +678,168 @@ export default function UserProfile() {
                 <CardTitle className="text-base sm:text-lg font-semibold">
                   Saved Addresses
                 </CardTitle>
-                <Button
-                  size="sm"
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs sm:text-sm"
-                >
-                  <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                  Add
-                </Button>
+                {!showAddressForm && (
+                  <Button
+                    size="sm"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs sm:text-sm"
+                    onClick={() => setShowAddressForm(true)}
+                  >
+                    <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                    Add
+                  </Button>
+                )}
               </CardHeader>
-              <CardContent className="p-4 sm:p-6 pt-0">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
-                  {mockAddresses.map((address) => (
-                    <div
-                      key={address.id}
-                      className={`p-4 rounded-xl border-2 ${
-                        address.isDefault
-                          ? "border-primary bg-primary/5"
-                          : "border-border"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <Badge
-                            variant="outline"
-                            className={`text-xs ${
-                              address.isDefault
-                                ? "border-primary text-primary"
-                                : ""
-                            }`}
-                          >
-                            {address.type}
-                          </Badge>
-                          {address.isDefault && (
-                            <Badge className="bg-primary text-primary-foreground text-xs">
-                              Default
-                            </Badge>
-                          )}
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 sm:h-8 sm:w-8"
-                        >
-                          <Edit2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                        </Button>
+              <CardContent className="p-4 sm:p-6 pt-0 space-y-4">
+                {/* Add / Edit Form */}
+                {showAddressForm && (
+                  <div className="border border-border rounded-xl p-4 space-y-4 bg-muted/30">
+                    <h3 className="font-semibold text-sm">
+                      {editingAddressId ? "Edit Address" : "New Address"}
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Label (Optional)</Label>
+                        <Input
+                          placeholder="e.g. Home, Work"
+                          value={addressForm.label}
+                          onChange={(e) =>
+                            setAddressForm((p) => ({
+                              ...p,
+                              label: e.target.value,
+                            }))
+                          }
+                          className="text-sm"
+                        />
                       </div>
-                      <p className="font-semibold text-sm sm:text-base text-foreground">
-                        {address.name}
-                      </p>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        {address.address}
-                      </p>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        {address.city}
-                      </p>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">District *</Label>
+                        <Select
+                          value={addressForm.district}
+                          onValueChange={(v) =>
+                            setAddressForm((p) => ({ ...p, district: v }))
+                          }
+                        >
+                          <SelectTrigger className="text-sm">
+                            <SelectValue placeholder="Select district" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {LUMBINI_DISTRICTS.map((d) => (
+                              <SelectItem key={d} value={d}>
+                                {d}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">City / Municipality *</Label>
+                        <Input
+                          placeholder="e.g. Butwal"
+                          value={addressForm.city}
+                          onChange={(e) =>
+                            setAddressForm((p) => ({
+                              ...p,
+                              city: e.target.value,
+                            }))
+                          }
+                          className="text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Full Address *</Label>
+                        <Textarea
+                          placeholder="Street, Ward No., Landmark"
+                          value={addressForm.fullAddress}
+                          onChange={(e) =>
+                            setAddressForm((p) => ({
+                              ...p,
+                              fullAddress: e.target.value,
+                            }))
+                          }
+                          className="text-sm"
+                        />
+                      </div>
                     </div>
-                  ))}
-                </div>
+                    <div className="flex gap-2 pt-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={handleCancelAddressForm}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="flex-1 bg-primary hover:bg-primary/90"
+                        onClick={handleSaveAddress}
+                      >
+                        <Save className="w-3 h-3 mr-1.5" />
+                        {editingAddressId ? "Update" : "Save"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Address List */}
+                {addresses.length === 0 && !showAddressForm ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <MapPin className="w-10 h-10 mx-auto mb-3 opacity-40" />
+                    <p className="text-sm">No saved addresses yet.</p>
+                    <p className="text-xs mt-1">
+                      Click "Add" to save a delivery address.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+                    {addresses.map((address) => (
+                      <div
+                        key={address.id}
+                        className="p-4 rounded-xl border-2 border-border"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          {address.label ? (
+                            <Badge
+                              variant="outline"
+                              className="text-xs border-primary text-primary"
+                            >
+                              {address.label}
+                            </Badge>
+                          ) : (
+                            <span />
+                          )}
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={() => handleEditAddress(address)}
+                            >
+                              <Edit2 className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-destructive hover:text-destructive"
+                              onClick={() => handleDeleteAddress(address.id)}
+                            >
+                              <Trash2Icon className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground font-medium">
+                          {address.district}
+                        </p>
+                        <p className="text-sm font-semibold text-foreground">
+                          {address.city}
+                        </p>
+                        <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                          {address.fullAddress}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

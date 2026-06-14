@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCart } from '@/context/CartContext';
-import { LUMBINI_DISTRICTS, CheckoutForm } from '@/types';
+import { LUMBINI_DISTRICTS, CheckoutForm, SavedAddress } from '@/types';
 import { MapPin, Truck, ShoppingBag, CheckCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -24,6 +24,8 @@ export default function Checkout() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   
   const [form, setForm] = useState<CheckoutForm>({
     fullName: '',
@@ -37,11 +39,34 @@ export default function Checkout() {
   const [errors, setErrors] = useState<Partial<CheckoutForm>>({});
 
   useEffect(() => {
-     if (loading) return;
+    if (loading) return;
     if (!isAuthenticated) {
       router.push('/');
     }
   }, [isAuthenticated, router, loading]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('leukaa_saved_addresses');
+      if (stored) setSavedAddresses(JSON.parse(stored));
+    } catch {}
+  }, []);
+
+  const handleSelectSavedAddress = (address: SavedAddress) => {
+    setSelectedAddressId(address.id);
+    setForm((prev) => ({
+      ...prev,
+      district: address.district,
+      city: address.city,
+      address: address.fullAddress,
+    }));
+    setErrors((prev) => ({
+      ...prev,
+      district: undefined,
+      city: undefined,
+      address: undefined,
+    }));
+  };
 
 
    const scrollToTop = () => {
@@ -302,6 +327,39 @@ export default function Checkout() {
                   </div>
                 </div>
               </div>
+
+              {/* Saved Addresses */}
+              {savedAddresses.length > 0 && (
+                <div className="bg-card p-6 rounded-2xl shadow-card">
+                  <h2 className="font-bold text-lg mb-4">Saved Addresses</h2>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {savedAddresses.map((addr) => (
+                      <button
+                        key={addr.id}
+                        type="button"
+                        onClick={() => handleSelectSavedAddress(addr)}
+                        className={`text-left p-4 rounded-xl border-2 transition-colors w-full ${
+                          selectedAddressId === addr.id
+                            ? 'border-primary bg-primary/5'
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        {addr.label && (
+                          <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-1">
+                            {addr.label}
+                          </p>
+                        )}
+                        <p className="text-sm font-medium text-foreground">
+                          {addr.district} — {addr.city}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                          {addr.fullAddress}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Delivery Address */}
               <div className="bg-card p-6 rounded-2xl shadow-card">
