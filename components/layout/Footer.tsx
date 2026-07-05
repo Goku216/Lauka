@@ -3,15 +3,25 @@ import { Leaf, MapPin, Phone, Mail, Facebook, Instagram, Twitter } from 'lucide-
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useSiteConfig } from '@/context/SiteConfigContext';
+import { getCategories } from '@/service/categoryApi';
+import { CategoryResponse } from '@/service/productApi';
 
 
 export function Footer() {
   const {isAuthenticated, isAdmin} = useAuth()
   const { config, loading: siteConfigLoading, error } = useSiteConfig();
+  const [categories, setCategories] = useState<CategoryResponse[]>([]);
 
- 
+  useEffect(() => {
+    getCategories()
+      .then(({ categories }) => setCategories(categories))
+      .catch(() => {});
+  }, []);
+
+
   return (
     <footer className="bg-foreground text-background">
       {/* Newsletter */}
@@ -47,7 +57,7 @@ export function Footer() {
               <span className="text-lg font-bold">{config?.site_name || "Leukaa"}</span>
             </div>
             <p className="text-background/70 mb-4">
-              {config?.short_description || "Your trusted source for fresh and organic produce, delivered straight from local farms to your doorstep."}
+              {config?.short_description || "Your trusted online store for everything you need, delivered right to your doorstep."}
             </p>
             <div className="flex gap-4">
               <a href={config?.facebook} className="text-background/70 hover:text-primary transition-colors">
@@ -85,18 +95,22 @@ export function Footer() {
           <div>
             <h4 className="font-bold mb-4">Categories</h4>
             <ul className="space-y-2">
-              <li>
-                <Link href="/products?category=fruits" className="text-background/70 hover:text-primary transition-colors">Fresh Fruits</Link>
-              </li>
-              <li>
-                <Link href="/products?category=vegetables" className="text-background/70 hover:text-primary transition-colors">Vegetables</Link>
-              </li>
-              <li>
-                <Link href="/products?category=lemon-plants" className="text-background/70 hover:text-primary transition-colors">Lemon Plants</Link>
-              </li>
-              <li>
-                <Link href="/products?category=organic" className="text-background/70 hover:text-primary transition-colors">Organic Items</Link>
-              </li>
+              {categories.length === 0 ? (
+                <li>
+                  <Link href="/products" className="text-background/70 hover:text-primary transition-colors">All Products</Link>
+                </li>
+              ) : (
+                categories.slice(0, 5).map((category) => (
+                  <li key={category.reference_id}>
+                    <Link
+                      href={`/products?category=${category.reference_id}`}
+                      className="text-background/70 hover:text-primary transition-colors"
+                    >
+                      {category.name}
+                    </Link>
+                  </li>
+                ))
+              )}
             </ul>
           </div>
 

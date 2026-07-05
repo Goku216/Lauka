@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Leukaa",
-  description: "Fresh from Farm",
+  description: "Your one-stop online shopping destination",
 };
 
 export default function RootLayout({

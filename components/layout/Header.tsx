@@ -80,7 +80,7 @@ export function Header({ setModal }: HeaderProps) {
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">{config?.site_name || "Leukaa"}</h1>
-              <p className="text-xs text-muted-foreground">Fresh from Farm</p>
+              <p className="text-xs text-muted-foreground">Shop Everything</p>
             </div>
           </Link>
 

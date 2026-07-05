@@ -1,4 +1,4 @@
-import { Truck, Shield, Leaf, Clock } from 'lucide-react';
+import { Truck, Shield, Sparkles, Clock } from 'lucide-react';
 
 const badges = [
   {
@@ -17,9 +17,9 @@ const badges = [
     description: 'Quality guaranteed',
   },
   {
-    icon: Leaf,
-    title: '100% Fresh',
-    description: 'Farm to doorstep freshness',
+    icon: Sparkles,
+    title: 'Best Prices',
+    description: 'Great deals every day',
   },
 ];
 

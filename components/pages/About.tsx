@@ -3,7 +3,7 @@ import { Layout } from '@/components/layout/Layout';
 
 import { Button } from '@/components/ui/button';
 import { useSiteConfig } from '@/context/SiteConfigContext';
-import { Leaf, Heart, Users, MapPin, ArrowRight } from 'lucide-react';
+import { Sparkles, Truck, Users, MapPin, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 export default function About() {
@@ -16,12 +16,12 @@ export default function About() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-                Fresh from the Heart of <span className="text-primary">Lumbini</span>
+                Your Trusted <span className="text-primary">Online</span> Shopping Destination
               </h1>
               <p className="text-lg text-muted-foreground mb-8">
-                We are a family-owned organic farm and market, dedicated to bringing the freshest 
-                produce from local Lumbini farms directly to your table. Our mission is to promote 
-                healthy eating while supporting local farmers.
+                We are an online store dedicated to bringing you a wide range of quality
+                products at great prices. Our mission is to make shopping simple, affordable,
+                and convenient — delivered right to your doorstep.
               </p>
               <Link href="/products">
                 <Button className="btn-primary">
@@ -32,8 +32,8 @@ export default function About() {
             </div>
             <div className="relative">
               <img
-                src="https://images.unsplash.com/photo-1500076656116-558758c991c1?w=600&h=400&fit=crop"
-                alt="Organic farm in Lumbini"
+                src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&h=400&fit=crop"
+                alt="Supermarket shelves stocked with groceries"
                 className="rounded-3xl shadow-lg"
               />
             </div>
@@ -48,32 +48,32 @@ export default function About() {
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-card p-8 rounded-2xl shadow-card text-center">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Leaf className="h-8 w-8 text-primary" />
+                <Sparkles className="h-8 w-8 text-primary" />
               </div>
-              <h3 className="text-xl font-bold mb-3">{config?.organic_percentage || "100%"} Organic</h3>
+              <h3 className="text-xl font-bold mb-3">Quality Products</h3>
               <p className="text-muted-foreground">
-                All our products are grown without pesticides or harmful chemicals. 
-                We believe in natural farming methods that are good for you and the earth.
+                Every item is carefully selected to meet our high standards for
+                quality and value, so you can shop with confidence.
               </p>
             </div>
             <div className="bg-card p-8 rounded-2xl shadow-card text-center">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Heart className="h-8 w-8 text-primary" />
+                <Truck className="h-8 w-8 text-primary" />
               </div>
-              <h3 className="text-xl font-bold mb-3">Farm Fresh</h3>
+              <h3 className="text-xl font-bold mb-3">Fast Delivery</h3>
               <p className="text-muted-foreground">
-                From harvest to your doorstep within hours. We ensure maximum freshness 
-                by sourcing directly from local farms in Lumbini Province.
+                We deliver your orders quickly and reliably, bringing everything
+                you need right to your doorstep.
               </p>
             </div>
             <div className="bg-card p-8 rounded-2xl shadow-card text-center">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Users className="h-8 w-8 text-primary" />
               </div>
-              <h3 className="text-xl font-bold mb-3">Supporting Local</h3>
+              <h3 className="text-xl font-bold mb-3">Customer First</h3>
               <p className="text-muted-foreground">
-                We partner with over 50 local farmers in Lumbini Province, helping them 
-                get fair prices for their produce while supporting the local economy.
+                Our customers are at the heart of everything we do. Your
+                satisfaction is always our top priority.
               </p>
             </div>
           </div>
@@ -86,8 +86,8 @@ export default function About() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1">
               <img
-                src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=600&h=400&fit=crop"
-                alt="Fresh organic vegetables"
+                src="https://images.unsplash.com/photo-1550989460-0adf9ea622e2?w=600&h=400&fit=crop"
+                alt="Collection of fresh groceries on supermarket shelves"
                 className="rounded-3xl shadow-lg"
               />
             </div>
@@ -95,20 +95,19 @@ export default function About() {
               <h2 className="section-title mb-6">Our Story</h2>
               <div className="space-y-4 text-muted-foreground">
                 <p>
-                  {config?.site_name || "Leukaa"} started in 2020 with a simple idea: make fresh, organic 
-                  produce accessible to everyone in Lumbini Province. What began as a small 
-                  family farm has grown into a community of farmers, all committed to organic 
-                  and sustainable farming practices.
+                  {config?.site_name || "Leukaa"} started in 2020 with a simple idea: make quality
+                  products accessible to everyone at prices they can afford. What began as a small
+                  online store has grown into a trusted shopping destination for thousands of
+                  customers.
                 </p>
                 <p>
-                  We specialize in citrus fruits, particularly lemons and lemon plants, which 
-                  thrive in our region's climate. Our lemon trees are grown with care, and we 
-                  also offer saplings for those who want to grow their own organic lemons at home.
+                  We bring together a carefully curated selection of products across many
+                  categories, so you can find everything you need in one place — all with the
+                  convenience of shopping from home.
                 </p>
                 <p>
-                  Today, we serve hundreds of families across Lumbini Province, delivering fresh 
-                  fruits, vegetables, and organic products right to their doorsteps. Cash on 
-                  delivery makes it easy and accessible for everyone.
+                  Today, we serve hundreds of happy customers, delivering their orders right to
+                  their doorsteps. Cash on delivery makes it easy and accessible for everyone.
                 </p>
               </div>
             </div>
