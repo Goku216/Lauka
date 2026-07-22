@@ -12,19 +12,22 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Pencil, Trash2, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { AdminLayout } from '@/components/Admin/AdminLayout';
-import { productApi, ProductResponse, ProductFormData } from '@/service/productApi';
-import { validateProductForm, validateProductFiles, ValidationError } from '@/lib/validation/productValidation';
+import { productApi, ProductResponse, ProductPayload } from '@/service/productApi';
+import { validateProductForm, ValidationError } from '@/lib/validation/productValidation';
+import { validateImageFile, compressImage, MAX_UPLOAD_SIZE_MB } from '@/service/imageUtils';
+import { uploadFilesToR2 } from '@/service/uploadApi';
 import { toast } from 'sonner';
 import { getCategories } from '@/service/categoryApi';
 import { Categories } from '@/types/productTypes';
 
-
+const MAX_ADDITIONAL_IMAGES = 5;
 
 export default function Products() {
   const [products, setProducts] = useState<ProductResponse[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
+  const [submitStage, setSubmitStage] = useState<'idle' | 'uploading' | 'saving'>('idle');
+  const [compressing, setCompressing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductResponse | null>(null);
@@ -32,10 +35,12 @@ export default function Products() {
   const [categories, setCategories] = useState<Categories[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
-  
+
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const additionalImagesInputRef = useRef<HTMLInputElement>(null);
-  
+
+  const isBusy = compressing || submitStage !== 'idle';
+
   // Form state matching backend structure
   const [formData, setFormData] = useState({
     name: '',
@@ -51,11 +56,17 @@ export default function Products() {
     is_new: false,
   });
 
+  // Thumbnail: `thumbnail` holds a NEW file only (replaced by user); thumbnailPreview
+  // shows either the existing product image URL or a blob preview of the new file.
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string>('');
-  const [additionalImages, setAdditionalImages] = useState<File[]>([]);
-  const [additionalImagePreviews, setAdditionalImagePreviews] = useState<string[]>([]);
 
+  // Additional images are split into:
+  // - existingAdditionalImages: object keys / URLs already on R2, kept unless user removes them
+  // - newAdditionalImageFiles: freshly selected Files, compressed client-side, uploaded on submit
+  const [existingAdditionalImages, setExistingAdditionalImages] = useState<string[]>([]);
+  const [newAdditionalImageFiles, setNewAdditionalImageFiles] = useState<File[]>([]);
+  const [newAdditionalImagePreviews, setNewAdditionalImagePreviews] = useState<string[]>([]);
 
   // Fetch products on mount
   useEffect(() => {
@@ -63,15 +74,14 @@ export default function Products() {
     fetchCategories();
   }, [currentPage]);
 
-
   const fetchCategories = async () => {
-    try { 
-      const {categories} = await getCategories();
+    try {
+      const { categories } = await getCategories();
       setCategories(categories);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
     }
-  }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -89,17 +99,16 @@ export default function Products() {
       setTotalItems(0);
     } finally {
       setLoading(false);
-      
     }
   };
 
   const handleOpenModal = (product?: ProductResponse) => {
     setValidationErrors([]);
 
-const matchedCategory = categories.find(
-  (category) => category.slug === product?.category
-);
-    
+    const matchedCategory = categories.find(
+      (category) => category.slug === product?.category
+    );
+
     if (product) {
       setEditingProduct(product);
       setFormData({
@@ -116,14 +125,17 @@ const matchedCategory = categories.find(
         is_new: product.is_new || false,
       });
       setThumbnailPreview(product.image || '');
-      // Convert images array to preview URLs
-      setAdditionalImagePreviews(
+      setExistingAdditionalImages(
         product.images ? product.images.map(img => img.image) : []
       );
     } else {
       setEditingProduct(null);
       resetForm();
     }
+
+    setThumbnail(null);
+    setNewAdditionalImageFiles([]);
+    setNewAdditionalImagePreviews([]);
     setIsModalOpen(true);
   };
 
@@ -143,47 +155,94 @@ const matchedCategory = categories.find(
     });
     setThumbnail(null);
     setThumbnailPreview('');
-    setAdditionalImages([]);
-    setAdditionalImagePreviews([]);
+    setExistingAdditionalImages([]);
+    setNewAdditionalImageFiles([]);
+    setNewAdditionalImagePreviews([]);
   };
 
-  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleThumbnailChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setThumbnail(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setThumbnailPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+    if (!file) return;
 
-  const handleAdditionalImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (additionalImages.length + files.length > 5) {
-      toast.error('You can upload a maximum of 5 additional images');
+    const validationError = validateImageFile(file);
+    if (validationError) {
+      toast.error(validationError);
+      e.target.value = '';
       return;
     }
 
-    setAdditionalImages([...additionalImages, ...files]);
-    
-    const newPreviews: string[] = [];
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        newPreviews.push(reader.result as string);
-        if (newPreviews.length === files.length) {
-          setAdditionalImagePreviews([...additionalImagePreviews, ...newPreviews]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    try {
+      setCompressing(true);
+      const compressed = await compressImage(file);
+
+      if (compressed.size > 2 * 1024 * 1024) {
+        toast.error(`Could not compress image below ${MAX_UPLOAD_SIZE_MB}MB. Try a different image.`);
+        return;
+      }
+
+      setThumbnail(compressed);
+      setThumbnailPreview(URL.createObjectURL(compressed));
+    } catch (err) {
+      toast.error('Failed to process thumbnail. Please try another file.');
+    } finally {
+      setCompressing(false);
+      e.target.value = '';
+    }
   };
 
-  const removeAdditionalImage = (index: number) => {
-    setAdditionalImages(additionalImages.filter((_, i) => i !== index));
-    setAdditionalImagePreviews(additionalImagePreviews.filter((_, i) => i !== index));
+  const handleAdditionalImagesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const totalCount = existingAdditionalImages.length + newAdditionalImageFiles.length + files.length;
+    if (totalCount > MAX_ADDITIONAL_IMAGES) {
+      toast.error(`You can upload a maximum of ${MAX_ADDITIONAL_IMAGES} additional images`);
+      e.target.value = '';
+      return;
+    }
+
+    for (const file of files) {
+      const validationError = validateImageFile(file);
+      if (validationError) {
+        toast.error(`${file.name}: ${validationError}`);
+        e.target.value = '';
+        return;
+      }
+    }
+
+    try {
+      setCompressing(true);
+      const compressedFiles: File[] = [];
+
+      for (const file of files) {
+        const compressed = await compressImage(file);
+        if (compressed.size > 2 * 1024 * 1024) {
+          toast.error(`${file.name} could not be compressed below ${MAX_UPLOAD_SIZE_MB}MB. Skipped.`);
+          continue;
+        }
+        compressedFiles.push(compressed);
+      }
+
+      setNewAdditionalImageFiles(prev => [...prev, ...compressedFiles]);
+      setNewAdditionalImagePreviews(prev => [
+        ...prev,
+        ...compressedFiles.map(f => URL.createObjectURL(f)),
+      ]);
+    } catch (err) {
+      toast.error('Failed to process one or more images.');
+    } finally {
+      setCompressing(false);
+      e.target.value = '';
+    }
+  };
+
+  const removeExistingAdditionalImage = (index: number) => {
+    setExistingAdditionalImages(existingAdditionalImages.filter((_, i) => i !== index));
+  };
+
+  const removeNewAdditionalImage = (index: number) => {
+    setNewAdditionalImageFiles(newAdditionalImageFiles.filter((_, i) => i !== index));
+    setNewAdditionalImagePreviews(newAdditionalImagePreviews.filter((_, i) => i !== index));
   };
 
   const getFieldError = (fieldName: string) => {
@@ -193,20 +252,40 @@ const matchedCategory = categories.find(
   const handleSubmit = async () => {
     // Validate form
     const formErrors = validateProductForm(formData);
-    const fileErrors = validateProductFiles(thumbnail || undefined, additionalImages);
-    const allErrors = [...formErrors, ...fileErrors];
 
-    if (allErrors.length > 0) {
-      setValidationErrors(allErrors);
+    if (formErrors.length > 0) {
+      setValidationErrors(formErrors);
       toast.error('Please fix the validation errors before submitting');
       return;
     }
 
     setValidationErrors([]);
-    setSubmitting(true);
 
     try {
-      const apiData: ProductFormData = {
+      // 1. Upload thumbnail + any new gallery files together in a single presigned-url batch
+      let thumbnailKey: string | undefined;
+      let newlyUploadedKeys: string[] = [];
+
+      const filesToUpload = [
+        ...(thumbnail ? [thumbnail] : []),
+        ...newAdditionalImageFiles,
+      ];
+
+      if (filesToUpload.length > 0) {
+        setSubmitStage('uploading');
+        const uploadedKeys = await uploadFilesToR2(filesToUpload);
+
+        if (thumbnail) {
+          thumbnailKey = uploadedKeys[0];
+          newlyUploadedKeys = uploadedKeys.slice(1);
+        } else {
+          newlyUploadedKeys = uploadedKeys;
+        }
+      }
+
+      setSubmitStage('saving');
+
+      const apiData: ProductPayload = {
         name: formData.name.trim(),
         description: formData.description.trim(),
         price: parseFloat(formData.price),
@@ -215,8 +294,8 @@ const matchedCategory = categories.find(
         category: formData.category,
         discount_price: formData.discount_price ? parseFloat(formData.discount_price) : undefined,
         tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(t => t) : undefined,
-        image: thumbnail || undefined,
-        additional_images: additionalImages.length > 0 ? additionalImages : undefined,
+        ...(thumbnailKey ? { image: thumbnailKey } : {}),
+        additional_images: [...existingAdditionalImages, ...newlyUploadedKeys],
         unit: formData.unit.trim(),
         is_featured: formData.is_featured,
         is_new: formData.is_new,
@@ -237,7 +316,7 @@ const matchedCategory = categories.find(
       console.error('Failed to submit product:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to submit product. Please try again.');
     } finally {
-      setSubmitting(false);
+      setSubmitStage('idle');
     }
   };
 
@@ -264,14 +343,14 @@ const matchedCategory = categories.find(
   };
 
   const columns = [
-    { 
-      key: 'name', 
+    {
+      key: 'name',
       title: 'Name',
       render: (product: ProductResponse) => (
         <div className="flex items-center gap-3">
           {product.image && (
-            <img 
-              src={product.image} 
+            <img
+              src={product.image}
               alt={product.name}
               className="w-10 h-10 rounded-md object-cover"
             />
@@ -280,8 +359,8 @@ const matchedCategory = categories.find(
         </div>
       ),
     },
-    { 
-      key: 'price', 
+    {
+      key: 'price',
       title: 'Price',
       render: (product: ProductResponse) => (
         <div className="space-y-1">
@@ -331,19 +410,19 @@ const matchedCategory = categories.find(
       title: 'Actions',
       render: (product: ProductResponse) => (
         <div className="flex items-center gap-2">
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => handleOpenModal(product)}
-            disabled={submitting}
+            disabled={isBusy}
           >
             <Pencil className="w-4 h-4" />
           </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => handleDelete(product.reference_id)}
-            disabled={submitting}
+            disabled={isBusy}
           >
             <Trash2 className="w-4 h-4 text-destructive" />
           </Button>
@@ -360,7 +439,7 @@ const matchedCategory = categories.find(
             <h2 className="text-2xl font-bold text-foreground">Products</h2>
             <p className="text-muted-foreground">Manage your product catalog</p>
           </div>
-          <Button onClick={() => handleOpenModal()} disabled={loading || submitting}>
+          <Button onClick={() => handleOpenModal()} disabled={loading || isBusy}>
             <Plus className="w-4 h-4 mr-2" />
             Add Product
           </Button>
@@ -407,7 +486,7 @@ const matchedCategory = categories.find(
                 {editingProduct ? 'Edit Product' : 'Add New Product'}
               </DialogTitle>
             </DialogHeader>
-            
+
             <div className="space-y-4 py-4">
               {/* Name */}
               <div className="space-y-2">
@@ -420,6 +499,7 @@ const matchedCategory = categories.find(
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Enter product name"
                   className={getFieldError('name') ? 'border-destructive' : ''}
+                  disabled={isBusy}
                 />
                 {getFieldError('name') && (
                   <p className="text-sm text-destructive">{getFieldError('name')}</p>
@@ -438,12 +518,12 @@ const matchedCategory = categories.find(
                   placeholder="Enter product description"
                   rows={4}
                   className={getFieldError('description') ? 'border-destructive' : ''}
+                  disabled={isBusy}
                 />
                 {getFieldError('description') && (
                   <p className="text-sm text-destructive">{getFieldError('description')}</p>
                 )}
               </div>
-
 
               {/* Price and Discount Price */}
               <div className="grid grid-cols-2 gap-4">
@@ -460,12 +540,13 @@ const matchedCategory = categories.find(
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     placeholder="0.00"
                     className={getFieldError('price') ? 'border-destructive' : ''}
+                    disabled={isBusy}
                   />
                   {getFieldError('price') && (
                     <p className="text-sm text-destructive">{getFieldError('price')}</p>
                   )}
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="discount_price">Discount Price</Label>
                   <Input
@@ -477,6 +558,7 @@ const matchedCategory = categories.find(
                     onChange={(e) => setFormData({ ...formData, discount_price: e.target.value })}
                     placeholder="0.00"
                     className={getFieldError('discount_price') ? 'border-destructive' : ''}
+                    disabled={isBusy}
                   />
                   {getFieldError('discount_price') && (
                     <p className="text-sm text-destructive">{getFieldError('discount_price')}</p>
@@ -497,6 +579,7 @@ const matchedCategory = categories.find(
                   onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                   placeholder="0"
                   className={getFieldError('stock') ? 'border-destructive' : ''}
+                  disabled={isBusy}
                 />
                 {getFieldError('stock') && (
                   <p className="text-sm text-destructive">{getFieldError('stock')}</p>
@@ -511,6 +594,7 @@ const matchedCategory = categories.find(
                 <Select
                   value={formData.category}
                   onValueChange={(value) => setFormData({ ...formData, category: value })}
+                  disabled={isBusy}
                 >
                   <SelectTrigger className={getFieldError('category') ? 'border-destructive' : ''}>
                     <SelectValue placeholder="Select category" />
@@ -537,6 +621,7 @@ const matchedCategory = categories.find(
                   onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
                   placeholder="e.g., kg, pcs, liters"
                   className={getFieldError('unit') ? 'border-destructive' : ''}
+                  disabled={isBusy}
                 />
                 {getFieldError('unit') && (
                   <p className="text-sm text-destructive">{getFieldError('unit')}</p>
@@ -552,6 +637,7 @@ const matchedCategory = categories.find(
                   onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
                   placeholder="electronics, phone (comma-separated)"
                   className={getFieldError('tags') ? 'border-destructive' : ''}
+                  disabled={isBusy}
                 />
                 <p className="text-xs text-muted-foreground">
                   Separate tags with commas (max 10 tags)
@@ -572,9 +658,10 @@ const matchedCategory = categories.find(
                 <Switch
                   id="is_available"
                   checked={formData.in_stock}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     setFormData({ ...formData, in_stock: checked })
                   }
+                  disabled={isBusy}
                 />
               </div>
 
@@ -584,8 +671,8 @@ const matchedCategory = categories.find(
                 <div className="space-y-3">
                   {thumbnailPreview && (
                     <div className="relative inline-block">
-                      <img 
-                        src={thumbnailPreview} 
+                      <img
+                        src={thumbnailPreview}
                         alt="Thumbnail preview"
                         className="w-32 h-32 rounded-lg object-cover border"
                       />
@@ -601,6 +688,7 @@ const matchedCategory = categories.find(
                             thumbnailInputRef.current.value = '';
                           }
                         }}
+                        disabled={isBusy}
                       >
                         <X className="w-3 h-3" />
                       </Button>
@@ -612,9 +700,10 @@ const matchedCategory = categories.find(
                     accept="image/jpeg,image/jpg,image/png,image/webp"
                     onChange={handleThumbnailChange}
                     className="cursor-pointer"
+                    disabled={isBusy}
                   />
                   <p className="text-xs text-muted-foreground">
-                    JPEG, PNG, or WebP (max 5MB)
+                    JPEG, PNG, or WebP — max {MAX_UPLOAD_SIZE_MB}MB (larger images are compressed automatically)
                   </p>
                   {getFieldError('thumbnail') && (
                     <p className="text-sm text-destructive">{getFieldError('thumbnail')}</p>
@@ -624,14 +713,14 @@ const matchedCategory = categories.find(
 
               {/* Additional Images */}
               <div className="space-y-2">
-                <Label>Additional Images (max 5)</Label>
+                <Label>Additional Images (max {MAX_ADDITIONAL_IMAGES})</Label>
                 <div className="space-y-3">
-                  {additionalImagePreviews.length > 0 && (
+                  {(existingAdditionalImages.length > 0 || newAdditionalImagePreviews.length > 0) && (
                     <div className="flex flex-wrap gap-2">
-                      {additionalImagePreviews.map((preview, index) => (
-                        <div key={index} className="relative inline-block">
-                          <img 
-                            src={preview} 
+                      {existingAdditionalImages.map((url, index) => (
+                        <div key={`existing-${index}`} className="relative inline-block">
+                          <img
+                            src={url}
                             alt={`Additional ${index + 1}`}
                             className="w-24 h-24 rounded-lg object-cover border"
                           />
@@ -640,7 +729,27 @@ const matchedCategory = categories.find(
                             variant="destructive"
                             size="icon"
                             className="absolute -top-2 -right-2 h-6 w-6"
-                            onClick={() => removeAdditionalImage(index)}
+                            onClick={() => removeExistingAdditionalImage(index)}
+                            disabled={isBusy}
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      ))}
+                      {newAdditionalImagePreviews.map((preview, index) => (
+                        <div key={`new-${index}`} className="relative inline-block">
+                          <img
+                            src={preview}
+                            alt={`New additional ${index + 1}`}
+                            className="w-24 h-24 rounded-lg object-cover border"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute -top-2 -right-2 h-6 w-6"
+                            onClick={() => removeNewAdditionalImage(index)}
+                            disabled={isBusy}
                           >
                             <X className="w-3 h-3" />
                           </Button>
@@ -648,7 +757,8 @@ const matchedCategory = categories.find(
                       ))}
                     </div>
                   )}
-                  {additionalImages.length < 5 && (
+
+                  {existingAdditionalImages.length + newAdditionalImageFiles.length < MAX_ADDITIONAL_IMAGES && (
                     <Input
                       ref={additionalImagesInputRef}
                       type="file"
@@ -656,10 +766,19 @@ const matchedCategory = categories.find(
                       multiple
                       onChange={handleAdditionalImagesChange}
                       className="cursor-pointer"
+                      disabled={isBusy}
                     />
                   )}
+
+                  {compressing && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Compressing image(s)...
+                    </div>
+                  )}
+
                   <p className="text-xs text-muted-foreground">
-                    JPEG, PNG, or WebP (max 5MB each)
+                    JPEG, PNG, or WebP — max {MAX_UPLOAD_SIZE_MB}MB each (larger images are compressed automatically)
                   </p>
                   {getFieldError('additional_images') && (
                     <p className="text-sm text-destructive">{getFieldError('additional_images')}</p>
@@ -679,9 +798,10 @@ const matchedCategory = categories.find(
                   <Switch
                     id="is_featured"
                     checked={formData.is_featured}
-                    onCheckedChange={(checked) => 
+                    onCheckedChange={(checked) =>
                       setFormData({ ...formData, is_featured: checked })
                     }
+                    disabled={isBusy}
                   />
                 </div>
                 <div className="flex items-center justify-between rounded-lg border p-4">
@@ -694,29 +814,37 @@ const matchedCategory = categories.find(
                   <Switch
                     id="is_new"
                     checked={formData.is_new}
-                    onCheckedChange={(checked) => 
+                    onCheckedChange={(checked) =>
                       setFormData({ ...formData, is_new: checked })
                     }
+                    disabled={isBusy}
                   />
                 </div>
               </div>
             </div>
 
             <DialogFooter>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => setIsModalOpen(false)}
-                disabled={submitting}
+                disabled={isBusy}
               >
                 Cancel
               </Button>
-              <Button onClick={handleSubmit} disabled={submitting}>
-                {submitting ? (
+              <Button onClick={handleSubmit} disabled={isBusy}>
+                {submitStage === 'uploading' && (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Uploading images...
+                  </>
+                )}
+                {submitStage === 'saving' && (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     {editingProduct ? 'Updating...' : 'Creating...'}
                   </>
-                ) : (
+                )}
+                {submitStage === 'idle' && (
                   editingProduct ? 'Update Product' : 'Create Product'
                 )}
               </Button>
@@ -727,14 +855,12 @@ const matchedCategory = categories.find(
       {showDeleteConfirm && (
         <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
           <DialogContent>
-            
-              <div className="flex flex-col">
-                <p>Are you sure you want to delete this product?</p>
-                <div className="flex justify-end gap-4 mt-6">
-                  <Button variant="outline" onClick={() => setShowDeleteConfirm(false)} >Cancel</Button>
-                  <Button variant="destructive" onClick={confirmDelete} >Delete</Button>
-                </div>
-              
+            <div className="flex flex-col">
+              <p>Are you sure you want to delete this product?</p>
+              <div className="flex justify-end gap-4 mt-6">
+                <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>Cancel</Button>
+                <Button variant="destructive" onClick={confirmDelete}>Delete</Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>

@@ -1,23 +1,22 @@
-import { IconName } from "@/extras/icon-map";
 import apiClient from "./ApiConfig/apiClient";
 import { WishlistResponse } from "@/types";
 
-// API service for product operations
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_API || "http://localhost:3000/api";
 
-export interface ProductFormData {
+// image/additional_images are now R2 object_keys (strings), not Files
+export interface ProductPayload {
   name: string;
   description: string;
   price: number;
   unit: string;
   stock: number;
   in_stock: boolean;
-  category: string; // UUID reference_id of category
+  category: string;
   discount_price?: number;
-  tags?: string[]; // Will be converted to comma-separated string for backend
-  image?: File;
-  additional_images?: File[]; // Will be sent as 'images' to backend
+  tags?: string[];
+  image?: string; // object_key of thumbnail
+  additional_images?: string[]; // object_keys, existing + newly uploaded
   is_featured?: boolean;
   is_new?: boolean;
 }
@@ -58,7 +57,6 @@ export interface ProductResponse {
 }
 
 class ProductApi {
-  // Get all products with optional pagination and filters
   async getProducts(params?: {
     page?: number;
     limit?: number;
@@ -67,216 +65,116 @@ class ProductApi {
   }): Promise<{ products: ProductResponse[]; total: number }> {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append("page", params.page.toString());
-    if (params?.limit) queryParams.append("page_size", params.limit.toString()); // Changed from 'limit' to 'page_size'
+    if (params?.limit) queryParams.append("page_size", params.limit.toString());
     if (params?.category) queryParams.append("category", params.category);
     if (params?.search) queryParams.append("search", params.search);
 
     const response = await fetch(`${API_BASE_URL}/products/?${queryParams}`, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
     });
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch products");
-    }
+    if (!response.ok) throw new Error("Failed to fetch products");
 
     const data = await response.json();
-
-    // Transform Django REST Framework response format
-    return {
-      products: data.results || [],
-      total: data.count || 0,
-    };
+    return { products: data.results || [], total: data.count || 0 };
   }
 
-  // Get single product by ID
   async getProduct(id: string): Promise<ProductResponse> {
     const response = await fetch(`${API_BASE_URL}/products/${id}`, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
     });
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch product");
-    }
-
+    if (!response.ok) throw new Error("Failed to fetch product");
     return response.json();
   }
 
-  // Create new product
-  async createProduct(data: ProductFormData): Promise<ProductResponse> {
-    const formData = new FormData();
-
-    formData.append("name", data.name);
-    formData.append("description", data.description);
-    formData.append("price", data.price.toString());
-    formData.append("stock", data.stock.toString());
-    formData.append("in_stock", data.in_stock.toString());
-    formData.append("category", data.category);
-
-    if (data.discount_price !== undefined) {
-      formData.append("discount_price", data.discount_price.toString());
+  async createProduct(data: ProductPayload): Promise<ProductResponse> {
+    try {
+      const payload = {
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        stock: data.stock,
+        in_stock: data.in_stock,
+        category: data.category,
+        unit: data.unit,
+        ...(data.discount_price !== undefined ? { discount_price: data.discount_price } : {}),
+        ...(data.tags && data.tags.length > 0 ? { tags: data.tags.join(",") } : {}),
+        ...(data.image ? { image: data.image } : {}),
+        ...(data.additional_images ? { additional_images: data.additional_images } : {}),
+        ...(data.is_featured !== undefined ? { is_featured: data.is_featured } : {}),
+        ...(data.is_new !== undefined ? { is_new: data.is_new } : {}),
+      };
+      const response = await apiClient.post<ProductResponse>("/products/create/", payload);
+      return response as any;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || "Failed to create product");
     }
-
-    if (data.tags && data.tags.length > 0) {
-      formData.append("tags", data.tags.join(","));
-    }
-
-    if (data.image) {
-      formData.append("image", data.image);
-    }
-
-    if (data.unit) {
-      formData.append("unit", data.unit);
-    }
-
-    if (data.is_featured) {
-      formData.append("is_featured", data.is_featured.toString());
-    }
-
-    if (data.is_new) {
-      formData.append("is_new", data.is_new.toString());
-    }
-
-    // Send as 'images' instead of 'additional_images'
-    if (data.additional_images && data.additional_images.length > 0) {
-      data.additional_images.forEach((file) => {
-        formData.append("additional_images", file);
-      });
-    }
-
-    const response = await fetch(`${API_BASE_URL}/products/create/`, {
-      method: "POST",
-      body: formData,
-      credentials: "include",
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Failed to create product");
-    }
-
-    return response.json();
   }
 
-  // Update existing product
-  async updateProduct(
-    id: string,
-    data: Partial<ProductFormData>
-  ): Promise<ProductResponse> {
-    const formData = new FormData();
+  async updateProduct(id: string, data: Partial<ProductPayload>): Promise<ProductResponse> {
+    try {
+      const payload: Record<string, any> = {};
+      if (data.name !== undefined) payload.name = data.name;
+      if (data.description !== undefined) payload.description = data.description;
+      if (data.price !== undefined) payload.price = data.price;
+      if (data.stock !== undefined) payload.stock = data.stock;
+      if (data.in_stock !== undefined) payload.in_stock = data.in_stock;
+      if (data.category !== undefined) payload.category = data.category;
+      if (data.unit !== undefined) payload.unit = data.unit;
+      if (data.discount_price !== undefined) payload.discount_price = data.discount_price;
+      if (data.tags && data.tags.length > 0) payload.tags = data.tags.join(",");
+      if (data.image !== undefined) payload.image = data.image;
+      if (data.additional_images !== undefined) payload.additional_images = data.additional_images;
+      if (data.is_featured !== undefined) payload.is_featured = data.is_featured;
+      if (data.is_new !== undefined) payload.is_new = data.is_new;
 
-    if (data.name) formData.append("name", data.name);
-    if (data.description) formData.append("description", data.description);
-    if (data.price !== undefined)
-      formData.append("price", data.price.toString());
-    if (data.stock !== undefined)
-      formData.append("stock", data.stock.toString());
-    if (data.in_stock !== undefined)
-      formData.append("in_stock", data.in_stock.toString());
-    if (data.category) formData.append("category", data.category);
-    if (data.discount_price !== undefined)
-      formData.append("discount_price", data.discount_price.toString());
-
-    if (data.tags && data.tags.length > 0) {
-      formData.append("tags", data.tags.join(","));
+      const response = await apiClient.put<ProductResponse>(`/products/${id}/update/`, payload);
+      return response as any;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || "Failed to update product");
     }
-
-    if (data.image) {
-      formData.append("image", data.image);
-    }
-
-    // Send as 'images' instead of 'additional_images'
-    if (data.additional_images && data.additional_images.length > 0) {
-      data.additional_images.forEach((file) => {
-        formData.append("additional_images", file);
-      });
-    }
-
-    const response = await fetch(`${API_BASE_URL}/products/${id}/update/`, {
-      method: "PUT",
-      body: formData,
-      credentials: "include",
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Failed to update product");
-    }
-
-    return response.json();
   }
 
-  // Delete product
   async deleteProduct(id: string): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/products/${id}/delete/`, {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       credentials: "include",
     });
-
-    if (!response.ok) {
-      throw new Error("Failed to delete product");
-    }
+    if (!response.ok) throw new Error("Failed to delete product");
   }
 
-  //Add wishlist
   async addToWishlist(id: string): Promise<any> {
     try {
-      const response = await apiClient.post("/wishlist/add/", {
-        product_id: id,
-      });
-      return response
+      return await apiClient.post("/wishlist/add/", { product_id: id });
     } catch (error: any) {
-      const message =
-        error?.response?.data?.message ||
-        error?.response?.data?.error ||
-        "Failed to add product";
-
-      throw new Error(message);
+      throw new Error(
+        error?.response?.data?.message || error?.response?.data?.error || "Failed to add product"
+      );
     }
   }
 
-  
-  //Remove from wishlist
-    async removeFromWishlist(id: string): Promise<any> {
+  async removeFromWishlist(id: string): Promise<any> {
     try {
-      const response = await apiClient.delete("/wishlist/remove/", {
-        product_id: String(id),
-      });
-      return response
+      return await apiClient.delete("/wishlist/remove/", { product_id: String(id) });
     } catch (error: any) {
-      const message =
-        error?.response?.data?.message ||
-        error?.response?.data?.error ||
-        "Failed to remove wishlist";
-
-      throw new Error(message);
+      throw new Error(
+        error?.response?.data?.message || error?.response?.data?.error || "Failed to remove wishlist"
+      );
     }
   }
 
-  //get wishlist
   async getWishlist(): Promise<any> {
     try {
-      const response = await apiClient.get<WishlistResponse>("/wishlist/")
-      return response
-
-    } 
-    catch(error: any){
-      const message = error?.response?.data?.message ||
-      error?.response?.data?.error ||
-      "Failed to fetch wishlist"
+      return await apiClient.get<WishlistResponse>("/wishlist/");
+    } catch (error: any) {
+      throw new Error(
+        error?.response?.data?.message || error?.response?.data?.error || "Failed to fetch wishlist"
+      );
     }
   }
-
 }
 
 export const productApi = new ProductApi();
-
-
